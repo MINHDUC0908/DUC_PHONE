@@ -5,7 +5,7 @@ use App\Http\Controllers\admin\CategoryController;
 use App\Http\Controllers\Admin\ChatController;
 use App\Http\Controllers\admin\ColorController;
 use App\Http\Controllers\Admin\CustomerController;
-use App\Http\Controllers\admin\DashboardController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\NewController;
 use App\Http\Controllers\admin\OrderController;
 use App\Http\Controllers\Admin\ProductController;

@@ -19,7 +19,7 @@ class DashboardController extends Controller
             return redirect()->route('login');
         }
         $name = Auth::user()->name;
-        $customer = Customer::count();
+        $customer = Customer::count();  
         $product = Product::count();
         $order = Order::all();
         $countOrder = Order::whereIn('status', ['Waiting for confirmation', 'Processing', 'Delivering', 'Completed'])->count();

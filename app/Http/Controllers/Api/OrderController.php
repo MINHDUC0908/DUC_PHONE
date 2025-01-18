@@ -308,7 +308,8 @@ class OrderController extends Controller
     public function order()
     {
         try {
-            $orders = Order::with('customer', 'shippingAddress')
+            $customer = Auth::id();
+            $orders = Order::with('customer', 'shippingAddress')->where("customer_id", $customer)
                 ->orderBy('id', 'DESC')
                 // ->get();
                 ->paginate(15);
@@ -333,13 +334,14 @@ class OrderController extends Controller
     public function getOrdersByStatus($status)
     {
         try {
+            $customer = Auth::id();
             $validStatuses = ['Waiting for confirmation', 'Processing', 'Delivering', 'Completed', 'Cancel'];
             if (!in_array($status, $validStatuses)) {
                 return response()->json([
                     'message' => 'Trạng thái không hợp lệ.',
                 ], 400);
             }
-            $orders = Order::with('customer', 'shippingAddress')
+            $orders = Order::with('customer', 'shippingAddress')->where("customer_id", $customer)
                 ->where('status', $status)
                 ->orderBy('id', 'DESC')
                 ->paginate(5);

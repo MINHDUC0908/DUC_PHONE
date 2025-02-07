@@ -1,15 +1,15 @@
 <?php
 
-use App\Http\Controllers\admin\BrandController;
-use App\Http\Controllers\admin\CategoryController;
+use App\Http\Controllers\Admin\BrandController;
+use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ChatController;
-use App\Http\Controllers\admin\ColorController;
+use App\Http\Controllers\Admin\ColorController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\NewController;
-use App\Http\Controllers\admin\OrderController;
+use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController;
-use App\Http\Controllers\admin\StatisticsController;
+use App\Http\Controllers\Admin\StatisticsController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\UserController;
 use Illuminate\Support\Facades\Route;

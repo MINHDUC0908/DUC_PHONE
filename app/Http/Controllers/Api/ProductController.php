@@ -33,31 +33,40 @@ class ProductController extends Controller
     public function show($id)
     {
         try {
-            $product = Product::with(['colors'])->findOrFail($id);
+            // Lấy sản phẩm và thông tin liên quan
+            $product = Product::with('colors')->findOrFail($id);
+
+            // Tăng lượt xem
             $product->increment('views');
+
+            // Lấy các sản phẩm liên quan cùng danh mục nhưng không bao gồm sản phẩm hiện tại
+            $relatedProducts = Product::where('category_id', $product->category_id)
+                ->where('id', '!=', $id)
+                ->limit(5) // Giới hạn số lượng sản phẩm liên quan
+                ->get();
+
             return response()->json([
                 'message' => 'Chi tiết sản phẩm',
                 'data' => $product,
+                'related_products' => $relatedProducts, // Thêm danh sách sản phẩm liên quan
             ]);
         } catch (QueryException $e) {
-            // Xử lý lỗi truy vấn cơ sở dữ liệu
             return response()->json([
                 'message' => 'Lỗi truy vấn cơ sở dữ liệu',
                 'error' => $e->getMessage(),
             ], 500);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            // Xử lý lỗi khi không tìm thấy sản phẩm
             return response()->json([
                 'message' => 'Sản phẩm không tồn tại',
             ], 404);
         } catch (\Exception $e) {
-            // Xử lý các lỗi khác
             return response()->json([
                 'message' => 'Có lỗi xảy ra',
                 'error' => $e->getMessage(),
             ], 500);
         }
     }
+
     public function incrementProduct()
     {
         try {

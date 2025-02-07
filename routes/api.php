@@ -1,8 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\AddressController;
-use App\Http\Controllers\Api\auth\LoginController;
-use App\Http\Controllers\api\auth\RegisterController;
+use App\Http\Controllers\Api\Auth\LoginController;
+use App\Http\Controllers\api\Auth\RegisterController;
 use App\Http\Controllers\Api\BrandController;
 use App\Http\Controllers\api\CartController;
 use App\Http\Controllers\Api\CategoryController;

@@ -2,27 +2,27 @@
 
 use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\Auth\LoginController;
-use App\Http\Controllers\api\Auth\RegisterController;
+use App\Http\Controllers\Api\Auth\RegisterController;
 use App\Http\Controllers\Api\BrandController;
-use App\Http\Controllers\api\CartController;
+use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ChatController;
-use App\Http\Controllers\api\CommentController;
+use App\Http\Controllers\Api\CommentController;
 use App\Http\Controllers\Api\NewController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductController;
-use App\Http\Controllers\api\ProfileController;
+use App\Http\Controllers\Api\ProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| API Routes
+| Api Routes
 |--------------------------------------------------------------------------
 |
-| Here is where you can register API routes for your application. These
+| Here is where you can register Api routes for your application. These
 | routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
+| is assigned the "Api" middleware group. Enjoy building your Api!
 |
 */
 
@@ -44,7 +44,7 @@ Route::post('login', [LoginController::class, 'login']);
 Route::middleware('auth:sanctum')->get('/user-profile', [LoginController::class, 'getUserProfile']);
 Route::post('register', [RegisterController::class, 'register']);
 Route::post('logout', [LoginController::class, 'logout']);
-// routes/api.php
+// routes/Api.php
 Route::get('/products/{productId}/comments', [CommentController::class, 'index']);
 Route::get('incrementProduct', [ProductController::class, 'incrementProduct']);
 Route::get('ProductNew', [ProductController::class, 'ProductNew']);

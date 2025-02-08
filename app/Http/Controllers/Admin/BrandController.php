@@ -1,12 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\admin;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\BrandRequest;
 use App\Models\Brand;
 use App\Models\Category;
-use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 

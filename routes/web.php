@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\admin\BrandController;
+use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ChatController;
 use App\Http\Controllers\Admin\ColorController;
@@ -12,7 +12,6 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\StatisticsController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\UserController;
-use App\Models\Category;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -81,8 +80,8 @@ Route::group(['middleware' => ['auth', 'role:Admin']], function () {
 });
 
 // Xử lý gửi tin nhắn từ form
-Route::post('/admin/send-message/{id}', [ChatController::class, 'sendMessage'])->name('admin.send-message');
-Route::get('/admin/seen-message/{id}', [ChatController::class, 'show'])->name('admin.seen-message');
+Route::post('/Admin/send-message/{id}', [ChatController::class, 'sendMessage'])->name('Admin.send-message');
+Route::get('/Admin/seen-message/{id}', [ChatController::class, 'show'])->name('Admin.seen-message');
 
 Route::get('logout', [LoginController::class, 'logout'])->name('logout');
 Route::get('phan-vai-tro/{id}', [UserController::class, 'phanvaitro'])->name('phan-vai-tro');

@@ -11,74 +11,13 @@ use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class CartController extends Controller
 {
-    // public function storeCart(Request $request)
-    // {
-    //     try {
-    //         $productId = $request->product_id;  // ID sản phẩm
-    //         $quantity = $request->quantity;  // Số lượng sản phẩm
-    //         $colorName = $request->color_id;  // Tên màu, ví dụ "Red", "Black"
-
-    //         // Kiểm tra nếu màu sắc tồn tại trong cơ sở dữ liệu
-    //         $color = Color::where('color', $colorName)->first();
-
-    //         if (!$color) {
-    //             return response()->json([
-    //                 'error' => 'Không tìm thấy màu sắc',
-    //                 'message' => "Màu sắc '$colorName' không tồn tại trong hệ thống."
-    //             ], 404);
-    //         }
-
-    //         // Lấy hoặc tạo mới giỏ hàng của khách hàng
-    //         $customer_id = Auth::id();
-    //         $cart = Cart::firstOrCreate([
-    //             'customer_id' => $customer_id,
-    //             'status' => 'pending',
-    //         ]);
-
-    //         // Lấy sản phẩm từ database
-    //         $product = Product::findOrFail($productId);
-
-    //         // Kiểm tra xem sản phẩm đã có trong giỏ hàng chưa
-    //         $existingItem = CartItem::where('cart_id', $cart->id)
-    //                                 ->where('product_id', $product->id)
-    //                                 ->where('color_id', $color->id)
-    //                                 ->first();
-
-    //         if ($existingItem) {
-    //             // Nếu sản phẩm đã có trong giỏ hàng, cộng thêm số lượng
-    //             $existingItem->quantity += $quantity;
-    //             $existingItem->save();
-    //         } else {
-    //             // Nếu chưa có trong giỏ, thêm sản phẩm mới vào giỏ
-    //             CartItem::create([
-    //                 'cart_id' => $cart->id,
-    //                 'product_id' => $product->id,
-    //                 'color_id' => $color->id,
-    //                 'quantity' => $quantity,
-    //                 'price' => $product->price,
-    //             ]);
-    //         }
-    //         return response()->json([
-    //             'message' => 'Sản phẩm đã được thêm vào giỏ hàng',
-    //             'data' => $cart,
-    //         ]);
-    //     } catch (Exception $e) {
-    //         return response()->json([
-    //             'error' => 'Đã có lỗi xảy ra khi thêm vào giỏ hàng.',
-    //             'message' => $e->getMessage(),
-    //         ], 500);
-    //     }
-    // }
     public function storeCart(Request $request)
     {
         try {
-            $productId = $request->product_id;  // ID sản phẩm
-            $quantity = $request->quantity;  // Số lượng sản phẩm
-            $colorName = $request->color_id;  // Tên màu (nếu có)
-
             // Lấy hoặc tạo mới giỏ hàng của khách hàng
             $customer_id = Auth::id();
             $cart = Cart::firstOrCreate([
@@ -86,49 +25,43 @@ class CartController extends Controller
                 'status' => 'pending',
             ]);
 
-            // Lấy sản phẩm từ database
-            $product = Product::findOrFail($productId);
 
-            // Kiểm tra nếu có color_id và thêm màu vào giỏ nếu có
-            if ($colorName) {
-                // Kiểm tra nếu màu sắc tồn tại trong cơ sở dữ liệu
-                $color = Color::where('color', $colorName)->first();
-
+            $productId = $request->product_id;  // ID sản phẩm
+            $quantity = $request->quantity;  // Số lượng sản phẩm
+            $color_id = $request->color_id;  // Tên màu (nếu có)
+            $product = Product::with('colors')->findOrFail($productId);
+            // Lấy đúng `color_id` thuộc sản phẩm
+            $color = null;
+            if ($color_id) {
+                $color = $product->colors()->where('color', $color_id)->first();
+                Log::info($color);
                 if (!$color) {
                     return response()->json([
-                        'error' => 'Không tìm thấy màu sắc',
-                        'message' => "Màu sắc '$colorName' không tồn tại trong hệ thống."
+                        'error' => 'Không tìm thấy màu sắc cho sản phẩm',
+                        'message' => "Màu '$color_id' không tồn tại cho sản phẩm này."
                     ], 404);
                 }
-
-                // Kiểm tra xem sản phẩm đã có trong giỏ hàng với màu sắc cụ thể chưa
-                $existingItem = CartItem::where('cart_id', $cart->id)
-                                        ->where('product_id', $product->id)
-                                        ->where('color_id', $color->id)
-                                        ->first();
-            } else {
-                // Nếu không có color_id, không cần kiểm tra màu sắc, thêm vào giỏ hàng mà không có màu sắc
-                $existingItem = CartItem::where('cart_id', $cart->id)
-                                        ->where('product_id', $product->id)
-                                        ->whereNull('color_id')  // Sử dụng `whereNull` nếu không có màu sắc
-                                        ->first();
             }
 
+            // Tìm sản phẩm trong giỏ hàng với màu sắc tương ứng (nếu có)
+            $existingItem = CartItem::where([
+                                'cart_id' => $cart->id,
+                                'product_id' => $product->id,
+                                'color_id' => $color ? $color->id : null
+                            ])->first();
             if ($existingItem) {
-                // Nếu sản phẩm đã có trong giỏ hàng, cộng thêm số lượng
-                $existingItem->quantity += $quantity;
-                $existingItem->save();
+                // Nếu sản phẩm đã tồn tại trong giỏ hàng, tăng số lượng
+                $existingItem->increment('quantity', $quantity);
             } else {
-                // Nếu chưa có trong giỏ, thêm sản phẩm mới vào giỏ
+                // Nếu chưa có, thêm sản phẩm mới vào giỏ hàng
                 CartItem::create([
                     'cart_id' => $cart->id,
                     'product_id' => $product->id,
-                    'color_id' => $colorName ? $color->id : null,  // Nếu có màu sắc thì thêm vào, nếu không thì null
+                    'color_id' => $color ? $color->id : null,
                     'quantity' => $quantity,
                     'price' => $product->price,
                 ]);
             }
-
             return response()->json([
                 'message' => 'Sản phẩm đã được thêm vào giỏ hàng',
                 'data' => $cart,

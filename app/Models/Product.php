@@ -39,8 +39,9 @@ class Product extends Model
 
     public function colors()
     {
-        return $this->hasMany(Color::class);
+        return $this->hasMany(Color::class, 'product_id'); // Chỉ định khóa ngoại
     }
+    
 
     public function cartItems()
     {

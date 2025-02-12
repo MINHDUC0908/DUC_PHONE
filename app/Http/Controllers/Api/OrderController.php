@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
@@ -86,38 +87,6 @@ class OrderController extends Controller
                 'status' => 'Waiting for confirmation',
                 'shipping_address_id' => $shippingAddress->id
             ]);
-
-            // // Tạo các mục trong đơn hàng và trừ số lượng sản phẩm theo màu sắc
-            // foreach ($cartItems as $item) {
-            //     if ($item->product) { // Đảm bảo sản phẩm tồn tại
-            //         $product = $item->product;
-
-            //         // Kiểm tra số lượng sản phẩm trong màu sắc tương ứng
-            //         $color = $item->product->colors()->where('id', $item->color_id)->first();
-
-            //         if (!$color || $color->quantity < $item->quantity) {
-            //             // Nếu số lượng màu sắc không đủ, hủy đơn hàng hoặc thông báo lỗi
-            //             DB::rollBack();
-            //             return response()->json([
-            //                 'status' => 'error',
-            //                 'message' => 'Số lượng màu sắc không đủ'
-            //             ], 400);
-            //         }
-
-            //         // Trừ số lượng trong bảng colors
-            //         $color->quantity -= $item->quantity;
-            //         $color->save();
-
-            //         // Thêm mục đơn hàng vào bảng order_items
-            //         OrderItem::create([
-            //             'order_id' => $order->id,
-            //             'product_id' => $item->product_id,
-            //             'color_id' => $item->color_id,
-            //             'quantity' => $item->quantity,
-            //             'price' => $item->product->price
-            //         ]);
-            //     }
-            // }
             foreach ($cartItems as $item) {
                 if ($item->product) { // Đảm bảo sản phẩm tồn tại
                     $product = $item->product;
@@ -168,9 +137,12 @@ class OrderController extends Controller
                     ]);
                 }
             }
-
+            Log::info($cartItems);  // Để kiểm tra xem cartItems có dữ liệu đúng khôn
             // Gửi email xác nhận đơn hàng
-            Mail::to($request->user()->email)->send(new OrderConfirmation($order, $cartItems, $totalPrice));
+            $cartItemsArray = $cartItems->toArray();
+            Mail::to($request->user()->email)
+            ->queue((new OrderConfirmation($order, $cartItemsArray, $totalPrice))->delay(now()->addSeconds(5)));
+        
 
             // Xóa giỏ hàng sau khi đặt hàng thành công
             $cart->cartItems()->where('selected', 1)->delete();

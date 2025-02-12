@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\admin\BrandController;
-use App\Http\Controllers\admin\CategoryController;
+use App\Http\Controllers\Admin\BrandController;
+use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ChatController;
 use App\Http\Controllers\Admin\ColorController;
 use App\Http\Controllers\Admin\CustomerController;
@@ -80,8 +80,8 @@ Route::group(['middleware' => ['auth', 'role:Admin']], function () {
 });
 
 // Xử lý gửi tin nhắn từ form
-Route::post('/Admin/send-message/{id}', [ChatController::class, 'sendMessage'])->name('Admin.send-message');
-Route::get('/Admin/seen-message/{id}', [ChatController::class, 'show'])->name('Admin.seen-message');
+Route::post('/admin/send-message/{id}', [ChatController::class, 'sendMessage'])->name('admin.send-message');
+Route::get('/admin/seen-message/{id}', [ChatController::class, 'show'])->name('admin.seen-message');
 
 Route::get('logout', [LoginController::class, 'logout'])->name('logout');
 Route::get('phan-vai-tro/{id}', [UserController::class, 'phanvaitro'])->name('phan-vai-tro');
@@ -97,6 +97,3 @@ Route::get('/api/statistics/top-products', [StatisticsController::class, 'topSel
 Route::get('/api/statistics/orderStatusStats', [StatisticsController::class, 'orderStatusStats']);
 Route::get('/api/statistics/weeklyRevenueStats', [StatisticsController::class, 'weeklyRevenueStats']);
 Route::get('/api/statistics/dailyRevenueStats', [StatisticsController::class, 'dailyRevenueStats']);
-// Route::get("/hello", function(){
-//     return "hello";
-// });

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\admin;
+namespace App\Http\Controllers\Admin;
 
 use App\Events\ChatMessageSent;
 use App\Http\Controllers\Controller;
@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ChatController extends Controller
-{
+{  
     public function show($id)
     {
         $customers = Customer::whereHas('messages')->get();

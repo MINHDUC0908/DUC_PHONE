@@ -13,6 +13,20 @@ class Product extends Model
         'category_id', 'brand_id', 'product_name', 'description', 'price', 'outstanding', 'images', 'description_image',
     ];
 
+    public function getImageUrlAttribute()
+    {
+        return asset($this->images);
+    }
+
+    public function getDescriptionImagesUrlAttribute()
+    {
+        $images = json_decode($this->description_image, true);
+        if ($images) {
+            return array_map(fn($img) => asset($img), $images);
+        }
+        return [];
+    }
+
     public function category()
     {
         return $this->belongsTo(Category::class);

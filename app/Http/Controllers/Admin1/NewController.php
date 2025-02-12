@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\admin;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\News;
@@ -45,4 +45,5 @@ class NewController extends Controller
             return back()->with('error', 'Đã xảy ra lỗi: ' . $e->getMessage());
         }
     }
+
 }

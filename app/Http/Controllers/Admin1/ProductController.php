@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\admin;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProductRequest;
@@ -16,6 +16,11 @@ use Intervention\Image\Facades\Image;
 
 class ProductController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
     public function index()
     {
         $name = Auth::user()->name;
@@ -251,5 +256,5 @@ class ProductController extends Controller
     {
         $brands = Brand::where('category_id', $request->category_id)->get();
         return response()->json($brands);
-    }
+    }    
 }

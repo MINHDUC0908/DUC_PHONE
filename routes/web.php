@@ -27,7 +27,7 @@ use Illuminate\Support\Facades\Route;
 Route::group(['middleware' => ['guest']], function(){
     Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('login', [LoginController::class, 'login']);  
-});vds
+});
 Route::prefix('brand')->name('brand.')->group(function () {
     Route::get('/list', [BrandController::class, 'index'])->name('list');
     Route::get('/create', [BrandController::class, 'create'])->name('create');

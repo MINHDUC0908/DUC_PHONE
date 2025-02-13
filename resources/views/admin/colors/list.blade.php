@@ -24,7 +24,7 @@
                 <tr>
                     <td>{{ $color->id }}</td>
                     <td>{{ $color->color }}</td>
-                    <td>{{ $color->product->product_name ?? 'No Product' }}</td>
+                    <td>{{ $color->products->product_name ?? 'No Product' }}</td>
                     <td>{{ $color->quantity }}</td>
                     <td>
                         <a href="{{ route('colors.edit', $color->id) }}" class="btn btn-primary btn-sm">

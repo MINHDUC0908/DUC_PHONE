@@ -11,11 +11,10 @@ class Color extends Model
 
     protected $fillable = ['color', 'product_id', 'quantity'];
 
-    public function colors()
+    public function products()
     {
-        return $this->hasMany(Color::class, 'product_id'); // Chỉ định khóa ngoại
+        return $this->belongsTo(Product::class, 'product_id'); // Chỉ định khóa ngoại đúng
     }
-    
 
     public function cartItems()
     {

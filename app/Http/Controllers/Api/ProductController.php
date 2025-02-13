@@ -13,7 +13,11 @@ class ProductController extends Controller
     public function index()
     {
         try {
-            $product = Product::with(['category', 'brand'])->orderBy('id', 'DESC')->get();
+            $product = Product::with(['category', 'brand', 'colors'])
+                        ->has('colors')
+                        ->orderBy('id', 'DESC')
+                        ->get();
+        
             return response()->json([
                 'message' => 'Sản phẩm',
                 'data' => $product,

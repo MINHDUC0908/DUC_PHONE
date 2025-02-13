@@ -85,7 +85,9 @@ class OrderController extends Controller
                 'order_number' => 'ORDER_' . uniqid(),
                 'total_price' => $totalPrice,
                 'status' => 'Waiting for confirmation',
-                'shipping_address_id' => $shippingAddress->id
+                'shipping_address_id' => $shippingAddress->id,
+                'payment_method' => $request->payment_method,
+                'payment_status' => $request->payment_method === 'cod' ? 'unpaid' : 'paid', 
             ]);
             foreach ($cartItems as $item) {
                 if ($item->product) { // Đảm bảo sản phẩm tồn tại

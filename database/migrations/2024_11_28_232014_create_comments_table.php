@@ -28,7 +28,6 @@ return new class extends Migration
             $table->foreign('admin_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('parent_id')->references('id')->on('comments')->onDelete('cascade');
         });
-        
     }
 
     /**

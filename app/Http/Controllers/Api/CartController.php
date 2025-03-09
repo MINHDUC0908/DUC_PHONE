@@ -24,8 +24,6 @@ class CartController extends Controller
                 'customer_id' => $customer_id,
                 'status' => 'pending',
             ]);
-
-
             $productId = $request->product_id;  // ID sản phẩm
             $quantity = $request->quantity;  // Số lượng sản phẩm
             $color_id = $request->color_id;  // Tên màu (nếu có)

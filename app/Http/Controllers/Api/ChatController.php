@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Events\ChatMessageSent;
 use App\Http\Controllers\Controller;
-use App\Models\Customer;
 use App\Models\Message;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -29,7 +28,7 @@ class ChatController extends Controller
             'data' => $messages,
         ]);
     } 
-    public function sendMessage(Request $request)
+    public function sendMessageCustomer(Request $request)
     {
         $request->validate([
             'message' => 'required|string',
@@ -54,19 +53,7 @@ class ChatController extends Controller
         }
 
         // Phát sự kiện tin nhắn mới từ khách hàng
-        broadcast(new ChatMessageSent($messageContent, 'Customer'))->toOthers();
-
-        // Gửi tin nhắn tự động từ Admin
-        $adminMessage = 'Xin chào! DUCCOMPUTER Shop rất vui được hỗ trợ bạn. Bạn cần giúp đỡ gì không ạ?';
-        foreach ($users as $user) {
-            Message::create([
-                'customer_id' => $customerId,
-                'user_id' => $user->id,
-                'message' => $adminMessage,
-                'sender' => 'Admin'
-            ]);
-        }
-        broadcast(new ChatMessageSent($adminMessage, 'Admin'))->toOthers();
+        broadcast(new ChatMessageSent($messageContent, 'Customer', $users))->toOthers();
         return response()->json([
             'status' => 'success',
             'message' => 'Message sent!',

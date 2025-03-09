@@ -62,4 +62,22 @@ class NewController extends Controller
             ], 500);
         }
     }
+    public function limitNew()
+    {
+        try {
+            $new = News::orderBy('created_at', 'DESC')
+                                ->take(3)
+                                ->get();
+            return response()->json([
+                'status' => true,
+                'data' => $new,
+            ], 200);
+        } catch (Exception $e)
+        {
+            return response()->json([
+                'message' => 'Đã xảy ra lỗi khi lấy danh sách bài viết.',
+                'error' =>$e->getMessage(),
+            ], 500);
+        }
+    }
 }

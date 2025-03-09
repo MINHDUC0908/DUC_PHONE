@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Http;  // Thêm Http
+use Illuminate\Support\Facades\Http;
 
 class ShippingAddress extends Model
 {
@@ -33,60 +33,69 @@ class ShippingAddress extends Model
         return $this->hasMany(Order::class);
     }
 
-    // Lấy tên xã từ ID
-    public function getWardNameAttribute()
+    /**
+     * Lấy dữ liệu danh sách tỉnh, huyện, xã và lưu vào cache.
+     */
+    public static function loadLocations()
     {
-        if (!$this->ward) {
-            return null;
-        }
-
-        return Cache::remember("ward_name_{$this->ward}", 60*60, function () {
+        return Cache::remember('locations_data', 60 * 60, function () {
             try {
-                $response = Http::get("https://provinces.open-api.vn/api/w/{$this->ward}?depth=2");  // Sử dụng Http::get
-                $data = $response->json();
-                return $data['name'] ?? 'Unknown Ward';
+                $provinces = Http::get('https://provinces.open-api.vn/api/?depth=3')->json();
+                
+                $provinceList = [];
+                $districtList = [];
+                $wardList = [];
+
+                foreach ($provinces as $province) {
+                    $provinceList[$province['code']] = $province['name'];
+                    foreach ($province['districts'] as $district) {
+                        $districtList[$district['code']] = $district['name'];
+                        foreach ($district['wards'] as $ward) {
+                            $wardList[$ward['code']] = $ward['name'];
+                        }
+                    }
+                }
+
+                return [
+                    'provinces' => $provinceList,
+                    'districts' => $districtList,
+                    'wards' => $wardList,
+                ];
             } catch (\Exception $e) {
-                Log::error('Error fetching ward name: ' . $e->getMessage());
-                return 'Unknown Ward';
+                Log::error('Error fetching locations: ' . $e->getMessage());
+                return [
+                    'provinces' => [],
+                    'districts' => [],
+                    'wards' => [],
+                ];
             }
         });
     }
 
-    // Lấy tên quận từ ID
-    public function getDistrictNameAttribute()
-    {
-        if (!$this->district) {
-            return null;
-        }
-
-        return Cache::remember("district_name_{$this->district}", 60 * 60, function () {
-            try {
-                $response = Http::get("https://provinces.open-api.vn/api/d/{$this->district}?depth=2");  // Sử dụng Http::get
-                $data = $response->json();
-                return $data['name'] ?? 'Unknown District';
-            } catch (\Exception $e) {
-                Log::error('Error fetching district name: ' . $e->getMessage());
-                return 'Unknown District';
-            }
-        });
-    }
-
-    // Lấy tên tỉnh từ ID
+    /**
+     * Lấy tên tỉnh theo ID
+     */
     public function getProvinceNameAttribute()
     {
-        if (!$this->province) {
-            return null;
-        }
+        $locations = self::loadLocations();
+        return $locations['provinces'][$this->province] ?? 'Unknown Province';
+    }
 
-        return Cache::remember("province_name_{$this->province}", 60 * 60, function () {
-            try {
-                $response = Http::get("https://provinces.open-api.vn/api/p/{$this->province}?depth=2");  // Sử dụng Http::get
-                $data = $response->json();
-                return $data['name'] ?? 'Unknown Province';
-            } catch (\Exception $e) {
-                Log::error('Error fetching province name: ' . $e->getMessage());
-                return 'Unknown Province';
-            }
-        });
+    /**
+     * Lấy tên huyện theo ID
+     */
+    public function getDistrictNameAttribute()
+    {
+        $locations = self::loadLocations();
+        return $locations['districts'][$this->district] ?? 'Unknown District';
+    }
+
+    /**
+     * Lấy tên xã theo ID
+     */
+    public function getWardNameAttribute()
+    {
+        $locations = self::loadLocations();
+        return $locations['wards'][$this->ward] ?? 'Unknown Ward';
     }
 }

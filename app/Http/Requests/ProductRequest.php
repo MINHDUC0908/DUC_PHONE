@@ -23,7 +23,7 @@ class ProductRequest extends FormRequest
                 'unique:products,product_name,' . $productId,
             ],
             'description' => 'required|string',
-            'price' => 'required|numeric|min:0',
+            'price' => 'required|min:0',
             'category_id' => 'required|exists:categories,id',
             'brand_id' => 'required|exists:brands,id',
         ];

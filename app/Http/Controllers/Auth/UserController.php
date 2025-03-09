@@ -5,44 +5,30 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UserRequest;
 use App\Models\User;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
-        $users = User::all();
+        $users = User::whereDoesntHave('roles', function ($query) {
+            $query->where('name', 'Admin');
+        })->get();
         $name = Auth::user()->name;
         return view('admin.auth.User.index', compact('users', 'name'));
     }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
         $name = Auth::user()->name;
         return view('admin.auth.user.create', compact('name'));
     }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(UserRequest $request)
     {
         try {
@@ -51,56 +37,53 @@ class UserController extends Controller
             $user->email = $request->input('email');
             $user->password = Hash::make($request->input('password'));
             $user->save();
-            return redirect()->route('user.index')->with('status', 'Thêm người dùng thành công!');
+            return redirect()->route('user.index')->with('status', 'Thêm nhân sự thành công!');
         } catch (\Throwable $th) {
             return redirect()->back()->withErrors(['error' => 'Có lỗi xảy ra, vui lòng thử lại.']);
         }
     }
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function edit($id)
     {
-        //
+        try {
+            $user = User::findOrFail($id);
+            $name = Auth::user()->name;
+            return view("admin.auth.user.edit", compact("name", "user"));
+        } catch (Exception $e )
+        {
+            Log::debug($e->getMessage());
+        }
     }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
+    public function update(UserRequest $request, $id)
     {
-        //
+        try {
+            $user = User::findOrFail($id);
+            $user->name = $request->input("name");
+            $user->email = $request->input("email");
+            $user->password = Hash::make($request->input('password'));
+            $user->save();
+            return redirect()->route("user.index")->with("status", "Cập nhật nhân sự thành công!!!");
+        } catch (Exception $e)
+        {
+            Log::debug($e->getMessage());
+        }
     }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
         $user = User::findOrFail($id);
         $user->delete();
         return redirect()->back();
+    }
+    public function toggleLock($id)
+    {
+        try {
+            $user = User::findOrFail($id);
+            $user->is_locked = $user->is_locked ? 0 : 1;
+            $user->save();
+            return redirect()->route("user.index")->with("status", "Cập nhật trang thái tài khoản thành công!!!");
+        } catch (Exception $e)
+        {
+            Log::debug($e->getMessage());
+        }
     }
     public function phanvaitro($id)
     {
@@ -117,7 +100,7 @@ class UserController extends Controller
         $user = User::find($id);
         $user->syncRoles($data['role']);
         $role_id = $user->roles()->first();
-        return redirect()->route('user.index');
+        return redirect()->route('user.index')->with("status", 'Cấp quyền thành công');
     }
     public function phanquyen($id)
     {
@@ -135,7 +118,7 @@ class UserController extends Controller
         $role_id = $user->roles()->first()->id;
         $role = Role::find($role_id);
         $role->syncPermissions([$data['permissions']]);
-        return redirect()->route('user.index');
+        return redirect()->route('user.index')->with("status", "Cập nhật quyền thành công");
     }
     public function createRole()
     {
@@ -159,21 +142,4 @@ class UserController extends Controller
         Permission::create(['name' => $data['permission']]);
         return redirect()->back();
     }
-    // public function impersonate($id)
-    // {
-    //     $user = User::find($id);
-    //     if ($user) {
-    //         Session::put('impersonate', $user->id);
-    //         Auth::loginUsingId($user->id);
-    //     }
-    //     return redirect()->route('nhanvien');
-    // }
-    // public function revertImpersonation()
-    // {
-    //     if (Session::has('impersonate')) {
-    //         Session::forget('impersonate');
-    //         Auth::loginUsingId(2);
-    //     }
-    //     return redirect()->route('home'); 
-    // }
 }

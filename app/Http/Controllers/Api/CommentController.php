@@ -12,33 +12,45 @@ class CommentController extends Controller
     public function index($productId)
     {
         $comments = Comment::where('product_id', $productId)
-            ->whereNull('parent_id') // Lọc bình luận cấp 1 (không phải bình luận trả lời)
+            ->whereNull('parent_id') // Chỉ lấy bình luận gốc
             ->with([
-                'customer:id,name', // eager load customer
-                'admin:id,name',     // eager load admin
-                'replies.customer:id,name', // eager load replies của customer
-                'replies.admin:id,name',    // eager load replies của admin
+                'customer:id,name,email,image', // Lấy thêm image của customer
+                'admin:id,name,email,image',    // Lấy thêm image của admin
+                'replies' => function ($query) {
+                    $query->with([
+                        'customer:id,name,email,image',
+                        'admin:id,name,email,image',
+                        'replies'
+                    ]);
+                }
             ])
+            ->orderBy("created_at", "DESC")
             ->get()
-            ->map(function ($comment) {
-                return [
-                    'id' => $comment->id,
-                    'content' => $comment->content,
-                    'author' => $comment->customer ? $comment->customer->name : ($comment->admin ? $comment->admin->name : 'Anonymous'),
-                    'author_type' => $comment->customer_id ? 'customer' : 'admin', // Loại tác giả
-                    'replies' => $comment->replies->map(function ($reply) {
-                        return [
-                            'id' => $reply->id,
-                            'content' => $reply->content,
-                            'author' => $reply->customer ? $reply->customer->name : ($reply->admin ? $reply->admin->name : 'Anonymous'),
-                            'author_type' => $reply->customer_id ? 'customer' : 'admin', // Loại tác giả trả lời
-                        ];
-                    })
-                ];
-            });
-    
-        // Trả về kết quả dưới dạng JSON
+            ->map(fn($comment) => $this->formatComment($comment));
+
         return response()->json(['comments' => $comments]);
+    }
+
+    private function formatComment($comment)
+    {
+        return [
+            'id' => $comment->id,
+            'content' => $comment->content,
+            'author' => $comment->admin ? $comment->admin->name : ($comment->customer ? $comment->customer->name : 'Anonymous'),
+            'author_type' => $comment->admin_id ? 'admin' : 'customer',
+            'author_details' => $comment->admin ? [
+                'id' => $comment->admin->id,
+                'name' => $comment->admin->name,
+                'email' => $comment->admin->email,
+                'image' => $comment->admin->image, // Ảnh đại diện admin
+            ] : ($comment->customer ? [
+                'id' => $comment->customer->id,
+                'name' => $comment->customer->name,
+                'email' => $comment->customer->email,
+                'image' => $comment->customer->image, // Ảnh đại diện customer
+            ] : null),
+            'replies' => $comment->replies->map(fn($reply) => $this->formatComment($reply))
+        ];
     }
 
     // Tạo bình luận mới (bao gồm bình luận và câu trả lời)

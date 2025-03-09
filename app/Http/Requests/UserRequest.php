@@ -23,22 +23,26 @@ class UserRequest extends FormRequest
      */
     public function rules()
     {
+        $userID = $this->route('id') ?? $this->route('user');
+
         return [
             'name' => 'required|min:2|max:255',
-            'email' => 'required|email|unique:users,email|min:8|max:255',
-            'password' => 'required|min:8|max:255|confirmed',
+            'email' => 'required|email|min:8|max:255|unique:users,email,' . $userID,
+            'password' => $this->isMethod('post') ? 'required|min:8|max:255|confirmed' : 'nullable|min:8|max:255|confirmed', 
         ];
     }
+
     public function messages()
     {
         return [
             'required' => ':attribute không được để trống',
-            'min' => ':attribute không được nhỏ hớn :min kí tự',
+            'min' => ':attribute không được nhỏ hơn :min kí tự',
             'max' => ':attribute không được lớn hơn :max kí tự',
             'confirmed' => ':attribute nhập lại không khớp',
             'unique' => ':attribute đã tồn tại trong hệ thống',
         ];
     }
+
     public function attributes()
     {
         return [

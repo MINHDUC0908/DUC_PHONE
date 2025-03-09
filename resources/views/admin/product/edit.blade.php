@@ -15,12 +15,22 @@
 
     <form action="{{ route('product.update', ['id' => $product->id]) }}" method="POST" enctype="multipart/form-data">
         @csrf
-        <div class="form-group">
-            <label for="product_name">Tên sản phẩm</label>
-            <input type="text" class="form-control @error('product_name') is-invalid @enderror" id="product_name" name="product_name" value="{{ old('product_name', $product->product_name) }}">
-            @error('product_name')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="product_name" class="form-label">Tên sản phẩm</label>
+                <input type="text" class="form-control @error('product_name') is-invalid @enderror" id="product_name" name="product_name" value="{{ old('product_name', $product->product_name) }}">
+                @error('product_name')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+            
+            <div class="col-md-6 mb-3">
+                <label for="price" class="form-label">Giá sản phẩm</label>
+                <input type="number" class="form-control @error('price') is-invalid @enderror" id="price" name="price" value="{{ old('price', ($product->price)) }}" step="01">
+                @error('price')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
         </div>
 
         <div class="form-group">
@@ -38,15 +48,28 @@
                 <div class="invalid-feedback">{{ $message }}</div>
             @enderror
         </div>
+        <div class="row">
+            <!-- Chọn danh mục -->
+            <div class="col-md-6 mb-3">
+                <label for="category_id">Category</label>
+                <select name="category_id" id="category_id" class="form-control" onchange="fetchBrands()">
+                    @foreach ($categories as $item)
+                        <option value="{{ $item->id }}" {{ $item->id == $product->category_id ? 'selected' : '' }}>{{ $item->category_name }}</option>
+                    @endforeach
+                </select>
+                @error('category_id')
+                    <div class="text-danger">{{ $message }}</div>
+                @enderror
+            </div>
 
-        <div class="form-group">
-            <label for="price">Giá sản phẩm</label>
-            <input type="number" class="form-control @error('price') is-invalid @enderror" id="price" name="price" value="{{ old('price', $product->price) }}" step="0.01">
-            @error('price')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
+            <!-- Chọn thương hiệu -->
+            <div class="col-md-6 mb-3">
+                <label for="brand_id">Brand</label>
+            <select name="brand_id" id="brand_id" class="form-control">
+                <!-- Thương hiệu sẽ được thêm qua AJAX -->
+            </select>
+            </div>
         </div>
-
         <div class="form-group">
             <label for="images">Ảnh sản phẩm hiện tại</label><br>
             <img src="{{ asset('imgProduct/' . $product->images) }}" style="height: 100px; margin-bottom: 10px;"><br>
@@ -72,29 +95,7 @@
             <input type="file" class="form-control @error('description_image') is-invalid @enderror hidden" id="description_image" name="description_image[]" multiple onchange="previewDescriptionImage()">
             <div id="description-image-preview" style="margin-top: 10px;"></div>
         </div>
-        <div class="form-group">
-            <label for="category_id">Category</label>
-            <select name="category_id" id="category_id" class="form-control" onchange="fetchBrands()">
-                @foreach ($categories as $item)
-                    <option value="{{ $item->id }}" {{ $item->id == $product->category_id ? 'selected' : '' }}>{{ $item->category_name }}</option>
-                @endforeach
-            </select>
-        </div>
-        @error('category_id')
-            <div class="error" style="color: red">{{ $message }}</div>
-        @enderror
-
-        <div class="form-group">
-            <label for="brand_id">Brand</label>
-            <select name="brand_id" id="brand_id" class="form-control">
-                <!-- Thương hiệu sẽ được thêm qua AJAX -->
-            </select>
-        </div>
-        @error('brand_id')
-            <div class="error" style="color: red">{{ $message }}</div>
-        @enderror
-
-        <button type="submit" class="btn btn-primary" style="margin: 20px 0;">Cập nhật sản phẩm</button>
+        <button type="submit" class="btn btn-primary w-100">Cập nhật sản phẩm</button>
     </form>
 </div>
     <script>

@@ -1,0 +1,35 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
+
+class Coupon extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'code',
+        'discount_amount',
+        'expires_at',
+        'is_used',
+    ];
+
+    protected $casts = [
+        'expires_at' => 'datetime',
+    ];
+
+    // Kiểm tra mã giảm giá có hợp lệ không
+    public function isValid()
+    {
+        return !$this->is_used && Carbon::now()->lessThan($this->expires_at);
+    }
+
+    // Mối quan hệ với Order
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+}

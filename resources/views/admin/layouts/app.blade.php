@@ -14,10 +14,11 @@
     {{-- <link rel="stylesheet" href="{{ secure_asset('css/app.css') }}">
     <link rel="stylesheet" href="{{ secure_asset('js/app.js') }}"> --}}
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
-    <link rel="stylesheet" href="{{ asset('js/app.js') }}">
+    <link rel="stylesheet" href="{{ asset('css/status.css') }}">
     @yield('header')
     @yield('style')
 </head>
+<meta name="csrf-token" content="{{ csrf_token() }}">
 <body>
     <div class="d-flex">
         <!-- Sidebar -->
@@ -32,6 +33,9 @@
             @yield('content')
         </div>
     </div>
+    <script src="{{ asset('js/app.js') }}" ></script>
+    <script src="{{ asset('js/profile.js') }}" ></script>
+    <script src="{{ asset('js/chat.js') }}" ></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="//cdn.ckeditor.com/4.21.0/full/ckeditor.js"></script>

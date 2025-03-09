@@ -19,7 +19,7 @@ class BrandController extends Controller
             $brands = Brand::join('categories', 'categories.id', '=', 'brands.category_id')
                             ->orderBy('brands.id', 'desc')
                             ->select('brands.*', 'categories.category_name as category_name')
-                            ->paginate(5);
+                            ->paginate(10);
 
             return view('admin.brand.list', compact('brands', 'name'));
         } catch (Exception $e) {

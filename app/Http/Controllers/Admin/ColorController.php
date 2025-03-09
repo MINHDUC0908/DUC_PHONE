@@ -14,7 +14,7 @@ class ColorController extends Controller
     public function index()
     {
         $name = Auth::user()->name;
-        $colors = Color::all();
+        $colors = Color::orderBy("id", "DESC")->paginate(15);
         return view('admin.colors.list', compact('name', 'colors'));
     }
     public function create()
@@ -25,11 +25,11 @@ class ColorController extends Controller
     public function store(ColorRequest $request)
     {
         $color = new Color();
-        $color->color = $request->input('color');
+        $color->color = $request->input('color') ?? "None";
         $color->product_id = $request->input('product_id');
         $color->quantity = $request->input('quantity');
         $color->save();
-        return redirect()->route('colors.index');
+        return redirect()->route('colors.index')->with('status', "New color added successfully!");
     }
     public function show($id)
     {
@@ -45,16 +45,16 @@ class ColorController extends Controller
     public function update(ColorRequest $request, $id)
     {
         $color = Color::findOrFail($id);
-        $color->color = $request->input('color');
+        $color->color = $request->input('color') ?? "None";
         $color->product_id = $request->input('product_id');
         $color->quantity = $request->input('quantity');
         $color->save();
-        return redirect()->route('colors.index');
+        return redirect()->route('colors.index')->with('status', 'Color updated successfully!');
     }
     public function destroy($id)
     {
         $color = Color::findOrFail($id);
         $color->delete();
-        return redirect()->route('colors.index')->with('success', 'Color deleted successfully!');
+        return redirect()->route('colors.index')->with('status', 'Color deleted successfully!');
     }    
 }

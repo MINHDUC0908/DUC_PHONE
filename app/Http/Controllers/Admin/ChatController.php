@@ -23,36 +23,43 @@ class ChatController extends Controller
         return view('admin.chat.chat', compact('customer', 'messages', 'customers'));
     }
     
-    public function sendMessage(Request $request, $id)
+    public function index()
     {
-        $message = $request->input('message');
-    
-        // Kiểm tra nếu không có tin nhắn
-        if (empty($message)) {
-            return response()->json(['success' => false, 'message' => 'Message cannot be empty']);
-        }
-        
-        // Kiểm tra khách hàng
+        $customers = Customer::whereHas('messages')->get();
+        return view('admin.chat.index', compact('customers'));
+    }    
+
+    public function sendMessageUser(Request $request, $id)
+    {
         $customer = Customer::find($id);
         if (!$customer) {
-            return response()->json(['success' => false, 'message' => 'Customer not found']);
+            return response()->json([
+                'success' => false, 
+                'message' => 'Customer not found'
+            ], 404);
         }
-        
-        $user = Auth::user()->id;
+
+        $user = Auth::id();
+        $message = $request->input('message');
         $sender = 'Admin';
-        $mess = Message::create([
+        $chatMessage = Message::create([
             'customer_id' => $customer->id,
             'user_id' => $user,
             'message' => $message,
             'sender' => $sender,
         ]);
-
-        // Phát sự kiện chat
-        broadcast(new ChatMessageSent($message, $sender))->toOthers();
-
-        return redirect()->json([
-            'success' => true, 
+        try {
+            broadcast(new ChatMessageSent($chatMessage->message, $chatMessage->sender))->toOthers();
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Broadcasting failed: ' . $e->getMessage(),
+            ], 500);
+        }
+        return response()->json([
+            'success' => true,
             'message' => $message,
         ]);
     }
+
 }

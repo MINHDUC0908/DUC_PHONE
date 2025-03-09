@@ -8,6 +8,8 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 
 class ProfileController extends Controller
 {
@@ -42,6 +44,7 @@ class ProfileController extends Controller
 
         // Trả về phản hồi thành công
         return response()->json([
+            'status' => "success",
             'message' => 'Mật khẩu đã được thay đổi thành công!'
         ], 200);
     }
@@ -57,7 +60,7 @@ class ProfileController extends Controller
             }
             $customer->name = $request->input('name');
             $customer->date = $request->input('date');
-            $customer->gender = $request->input('gender');
+            $customer->gender = $request->gender ? 1 : 0;
             $customer->save();
             return response()->json([
                 'message' => 'Cập nhật thành công',
@@ -66,6 +69,44 @@ class ProfileController extends Controller
             ], 200);
         } catch (Exception $e)
         {
+            return response()->json([
+                'message' => 'Lỗi khi cập nhật dữ liệu',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
+    public function image(Request $request, $id)
+    {
+        try {
+            $customer = Customer::findOrFail($id);
+
+            if ($request->hasFile('image')) {
+                $file = $request->file('image');
+                // ✅ Xóa ảnh cũ nếu có
+                if (!empty($customer->image)) {
+                    Storage::delete("public/imgCustomer/{$customer->image}");
+                }
+                // ✅ Tạo tên file mới & lưu vào thư mục
+                $filename = time() . '.' . $file->getClientOriginalExtension();
+                $file->storeAs('public/imgCustomer', $filename);
+                $customer->image = $filename;
+                $customer->save();
+
+                return response()->json([
+                    'message' => 'Cập nhật ảnh thành công!',
+                    'image' => asset("storage/imgCustomer/{$filename}"),
+                    'status' => "success",
+                ]);
+            }
+            return response()->json([
+                'message' => 'Không có ảnh nào được tải lên!',
+            ], 400);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => 'Dữ liệu không hợp lệ!',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Lỗi khi cập nhật dữ liệu',
                 'error' => $e->getMessage(),

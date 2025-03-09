@@ -2,16 +2,21 @@
 
 use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\Auth\LoginController;
+use App\Http\Controllers\Api\Auth\LoginGoogleController;
 use App\Http\Controllers\Api\Auth\RegisterController;
 use App\Http\Controllers\Api\BrandController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\CommentController;
+use App\Http\Controllers\Api\ForgotPassword;
 use App\Http\Controllers\Api\NewController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\RatingController;
+use App\Http\Controllers\Api\SearchController;
+use App\Http\Controllers\Api\VNPayController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -52,6 +57,14 @@ Route::get('ProductNew', [ProductController::class, 'ProductNew']);
 Route::get('news', [NewController::class, 'index']);
 Route::get('show/{id}', [NewController::class, 'show']);
 Route::get('new', [NewController::class, 'New']);
+Route::get("limitNew", [NewController::class, "limitNew"]);
+
+Route::get('/auth/google', [LoginGoogleController::class, 'redirectToGoogle']);
+Route::get('/auth/google/callback', [LoginGoogleController::class, 'handleGoogleCallback']);
+Route::post('/forgot-password', [ForgotPassword::class, 'ForgotPassword']);
+Route::post('/reset-password', [ForgotPassword::class, 'resetPassword']);
+Route::get('/searchBrand', [SearchController::class, 'searchBrand']);
+Route::get('/searchCategory', [SearchController::class, 'searchCategory']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('storeCart', [CartController::class, 'storeCart']);
     Route::get('countCart' , [CartController::class, 'countCart']);
@@ -62,7 +75,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('update/{id}', [CartController::class, 'update']);
     Route::post('createAddress', [AddressController::class, 'store']);
     Route::get('address', [AddressController::class, 'index']);
-    Route::post('checkout', [OrderController::class,'CheckOut']);
     Route::get('order', [OrderController::class,'order']);
     Route::put('updateOrderStatus/{id}', [OrderController::class, 'cancelOrder']);
     Route::put('updateOrder/{id}', [OrderController::class, 'updateOrder']);
@@ -77,9 +89,17 @@ Route::middleware('auth:sanctum')->group(function () {
     
 
     Route::put('/customer/update/{id}', [ProfileController::class, 'update']);
-
+    Route::post("/customer/image/{id}", [ProfileController::class, "image"]);
 
     Route::post('/change-password', [ProfileController::class, 'changePassword']);
-    Route::post('/send-message-fe', [ChatController::class, 'sendMessage']);
+    Route::post('/send-message-fe', [ChatController::class, 'sendMessageCustomer']);
     Route::get('/message-fe', [ChatController::class, 'index']);
+
+    Route::post("applyCoupon", [VNPayController::class, "applyCoupon"]);
+    Route::post('checkout', [VNPayController::class,'CheckOut']);
+    Route::get('/vnpay-return', [VNPayController::class, 'vnpayReturn'])->name('vnpay.return');
+
+
+    Route::post("storeReview", [RatingController::class, "storeReview"]);
 });
+Route::get('rating', [RatingController::class, 'index']);

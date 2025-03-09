@@ -11,10 +11,13 @@ class Customer extends Authenticatable
     use HasFactory, HasApiTokens;
     protected $table = 'customers';
     protected $fillable = [
+        "google_id",
         'name',
         'email',
         'password',
         'status',
+        "image",
+        "gender"
     ];
 
     protected $hidden = [
@@ -35,5 +38,8 @@ class Customer extends Authenticatable
     public function messages()
     {
         return $this->hasMany(Message::class);
+    }
+    public function ratings() {
+        return $this->hasMany(Rating::class);
     }
 }

@@ -4,14 +4,21 @@ use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ChatController;
 use App\Http\Controllers\Admin\ColorController;
+use App\Http\Controllers\Admin\CommentController;
+use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\DiscountController;
 use App\Http\Controllers\Admin\NewController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\RatingController;
 use App\Http\Controllers\Admin\StatisticsController;
+use App\Http\Controllers\Api\VNPayController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\UserController;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -28,35 +35,10 @@ Route::group(['middleware' => ['guest']], function(){
     Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('login', [LoginController::class, 'login']);  
 });
-Route::prefix('brand')->name('brand.')->group(function () {
-    Route::get('/list', [BrandController::class, 'index'])->name('list');
-    Route::get('/create', [BrandController::class, 'create'])->name('create');
-    Route::post('/create', [BrandController::class, 'store'])->name('store');
-    Route::get('/show/{id}', [BrandController::class, 'show'])->name('show');
-    Route::get('/edit/{id}', [BrandController::class, 'edit'])->name('edit');
-    Route::put('/edit/{id}', [BrandController::class, 'update'])->name('update');
-    Route::delete('/delete/{id}', [BrandController::class, 'destroy'])->name('delete');
-});
-Route::prefix('category')->name('category.')->group(function() {
-    Route::get('/list', [CategoryController::class, 'index'])->name('list');
-    Route::get('/create', [CategoryController::class, 'create'])->name('create');
-    Route::post('/create', [CategoryController::class, 'store'])->name('store');
-    Route::get('edit/{id}', [CategoryController::class, 'edit'])->name('edit');
-    Route::post('edit/{id}', [CategoryController::class, 'update'])->name('update');
-    Route::delete('delete/{id}', [CategoryController::class, 'destroy'])->name('delete');
-});
-Route::prefix('new')->name('new.')->group(function() {
-    Route::get('/list', [NewController::class, 'index'])->name('list');
-    Route::get('/create', [NewController::class, 'create'])->name('create');
-    Route::post('/create', [NewController::class, 'store'])->name('store');
-    Route::post('/show{id}', [NewController::class, 'store'])->name('show');
-    Route::get('edit/{id}', [NewController::class, 'edit'])->name('edit');
-    Route::post('edit/{id}', [NewController::class, 'update'])->name('update');
-    Route::delete('delete/{id}', [NewController::class, 'destroy'])->name('destroy');
-});
 Route::get('/', [DashboardController::class, 'dashboard'])->name('home');
 Route::group(['middleware' => ['auth', 'role:Admin']], function () {
     Route::resource('user', UserController::class);
+    Route::put("toggleLock/{id}", [UserController::class, "toggleLock"])->name("user.toggleLock");
     Route::prefix('product')->name('product.')->group(function(){
         Route::get('/list', [ProductController::class, 'index'])->name('list');
         Route::get('/create', [ProductController::class, 'create'])->name('create');
@@ -77,12 +59,74 @@ Route::group(['middleware' => ['auth', 'role:Admin']], function () {
         Route::get('list', [CustomerController::class,'index'])->name('list');
         Route::put('update/{id}', [CustomerController::class, 'update'])->name('update');
     });
+    Route::prefix('brand')->name('brand.')->group(function () {
+        Route::get('/list', [BrandController::class, 'index'])->name('list');
+        Route::get('/create', [BrandController::class, 'create'])->name('create');
+        Route::post('/create', [BrandController::class, 'store'])->name('store');
+        Route::get('/show/{id}', [BrandController::class, 'show'])->name('show');
+        Route::get('/edit/{id}', [BrandController::class, 'edit'])->name('edit');
+        Route::put('/edit/{id}', [BrandController::class, 'update'])->name('update');
+        Route::delete('/delete/{id}', [BrandController::class, 'destroy'])->name('delete');
+    });
+    Route::prefix('category')->name('category.')->group(function() {
+        Route::get('/list', [CategoryController::class, 'index'])->name('list');
+        Route::get('/create', [CategoryController::class, 'create'])->name('create');
+        Route::post('/create', [CategoryController::class, 'store'])->name('store');
+        Route::get('edit/{id}', [CategoryController::class, 'edit'])->name('edit');
+        Route::post('edit/{id}', [CategoryController::class, 'update'])->name('update');
+        Route::delete('delete/{id}', [CategoryController::class, 'destroy'])->name('delete');
+    });
+    Route::prefix('new')->name('new.')->group(function() {
+        Route::get('/list', [NewController::class, 'index'])->name('list');
+        Route::get('/create', [NewController::class, 'create'])->name('create');
+        Route::post('/create', [NewController::class, 'store'])->name('store');
+        Route::post('/show{id}', [NewController::class, 'store'])->name('show');
+        Route::get('edit/{id}', [NewController::class, 'edit'])->name('edit');
+        Route::put('edit/{id}', [NewController::class, 'update'])->name('update');
+        Route::delete('delete/{id}', [NewController::class, 'delete'])->name('destroy');
+    });
+
+    // Mã giảm giá
+    Route::prefix("coupon")->name("coupon.")->group(function() {
+        Route::get("index", [CouponController::class, 'index'])->name("index");
+        Route::get("create", [CouponController::class, 'create'])->name("create");
+        Route::post("create", [CouponController::class, "store"])->name("store");
+        Route::get("edit/{id}", [CouponController::class, 'edit'])->name("edit");
+        Route::put("edit/{id}", [CouponController::class, "update"])->name("update");
+        Route::delete("delete/{id}", [CouponController::class, "destroy"])->name("destroy");
+    });
+
+    Route::prefix("rating")->name("rating.")->group(function() {
+        Route::get("index", [RatingController::class, 'index'])->name("index");
+        Route::get("ratingImage", [RatingController::class, 'ratingImage'])->name("ratingImage");
+        Route::delete('/destroy/{id}', [RatingController::class, 'destroy'])->name('destroy');
+    });
+    Route::prefix("discount")->name("discount.")->group(function() {
+        Route::get("discount", [DiscountController::class, 'index'])->name("index");
+        Route::post("store", [DiscountController::class, 'store'])->name("store");
+        Route::put("update/{id}", [DiscountController::class, 'update'])->name("update");
+        Route::delete("destroy/{id}", [DiscountController::class, 'destroy'])->name("destroy");
+    });
+});
+Route::prefix('profile')->name('profile.')->group(function() {
+    Route::get("index", [ProfileController::class, 'index'])->name('index'); 
+    Route::put("update/{id}", [ProfileController::class, 'update'])->name('update');
+    Route::put("image/{id}", [ProfileController::class, "image"])->name('image');
+    Route::delete("image/{id}", [ProfileController::class, "deleteImage"])->name('deleteImage');
+    Route::put("updatePassword/{id}", [ProfileController::class, 'updatePassword'])->name("updatePassword");
+});
+
+// Comment
+Route::prefix("comment")->name("comment.")->group(function() {
+    Route::get("admin/list/comment", [CommentController::class, 'index'])->name("list");
+    Route::post('/admin/comment/reply/{commentId}', [CommentController::class, 'reply'])->name('reply');
+    Route::delete('/{id}', [CommentController::class, 'destroy'])->name('delete');
 });
 
 // Xử lý gửi tin nhắn từ form
-Route::post('/admin/send-message/{id}', [ChatController::class, 'sendMessage'])->name('admin.send-message');
+Route::post('/admin/send-message/{id}', [ChatController::class, 'sendMessageUser'])->name('admin.send-message');
 Route::get('/admin/seen-message/{id}', [ChatController::class, 'show'])->name('admin.seen-message');
-
+Route::get("/admin/seen-index", [ChatController::class, "index"])->name("admin.seen-index");
 Route::get('logout', [LoginController::class, 'logout'])->name('logout');
 Route::get('phan-vai-tro/{id}', [UserController::class, 'phanvaitro'])->name('phan-vai-tro');
 Route::post('storeRole/{id}', [UserController::class, 'storeRole'])->name('storeRole');
@@ -97,3 +141,6 @@ Route::get('/api/statistics/top-products', [StatisticsController::class, 'topSel
 Route::get('/api/statistics/orderStatusStats', [StatisticsController::class, 'orderStatusStats']);
 Route::get('/api/statistics/weeklyRevenueStats', [StatisticsController::class, 'weeklyRevenueStats']);
 Route::get('/api/statistics/dailyRevenueStats', [StatisticsController::class, 'dailyRevenueStats']);
+
+
+Route::get('/vnpay-return', [VNPayController::class, 'vnpayReturn'])->name('vnpay.return');

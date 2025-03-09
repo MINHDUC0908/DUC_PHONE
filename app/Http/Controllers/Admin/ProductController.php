@@ -23,15 +23,9 @@ class ProductController extends Controller
                     ->join('brands', 'brands.id', '=', 'products.brand_id')
                     ->orderBy('products.updated_at', 'DESC')
                     ->select('products.*', 'categories.category_name', 'brands.brand_name')
-                    ->get();
+                    ->paginate(15);
         return view('admin.product.list', compact('products', 'name'));
     }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {   
         $categories = Category::all();
@@ -39,13 +33,6 @@ class ProductController extends Controller
         $name = Auth::user()->name;
         return view('admin.product.create', compact('categories', 'brands', 'name'));
     }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(ProductRequest $request)
     {
         // $products = Product::where('name', 'like', '%keyword%')->get(); // Tìm sản phẩm theo tên
@@ -93,26 +80,11 @@ class ProductController extends Controller
             return redirect()->route('product.create')->with('error', 'Có lỗi xảy ra khi thêm sản phẩm.');
         }
     }
-
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function show($id)
     {
         $product = Product::findOrFail($id);
         return view('admin.product.show', compact('product'));
     }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function edit($id)
     {
         $name = Auth::user()->name;
@@ -120,14 +92,6 @@ class ProductController extends Controller
         $product = Product::findOrFail($id);
         return view('admin.product.edit', compact('product', 'categories', 'name'));
     }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(ProductRequest $request, $id)
     {
         try {
@@ -202,13 +166,6 @@ class ProductController extends Controller
             return redirect()->route('product.list')->with('error', 'An error occurred while updating the product: ' . $e->getMessage());
         }
     }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
         try {

@@ -3,9 +3,11 @@ namespace App\Events;
 
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class ChatMessageSent implements ShouldBroadcast
 {
@@ -13,22 +15,26 @@ class ChatMessageSent implements ShouldBroadcast
 
     public $message;
     public $sender;
-    // public $customer_id;
     public $timestamp;
+    public $customer_id;
 
-    public function __construct($message, $sender = 'Customer',)
+    public function __construct($message, $sender = 'Customer')
     {
         $this->message = $message;
         $this->sender = $sender;
-        // $this->customer_id = $customer_id;
         $this->timestamp = now()->toDateTimeString();
+        Log::info("📢 Sự kiện `ChatMessageSent` đã được gọi.", [
+            'message' => $this->message,
+            'sender' => $this->sender
+        ]);
     }
 
     public function broadcastOn()
     {
-        return new Channel('chat');
+        Log::info("📢 Phát sự kiện vào kênh:", ['channel' => 'chat.message']);
+        return new Channel('chat.message'); // Giữ nguyên Public Channel
     }
-
+    
     public function broadcastAs()
     {
         return 'ChatMessageSent';
@@ -39,8 +45,7 @@ class ChatMessageSent implements ShouldBroadcast
         return [
             'message' => $this->message,
             'sender' => $this->sender,
-            // 'customer_id' => $this->customer_id,
-            'timestamp' => $this->timestamp
+            'timestamp' => $this->timestamp,
         ];
     }
 }

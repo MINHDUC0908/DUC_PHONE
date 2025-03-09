@@ -19,158 +19,6 @@ use Illuminate\Support\Facades\Mail;
 
 class OrderController extends Controller
 {
-    public function checkout(Request $request)
-    {
-        try {
-            // Kiểm tra đăng nhập
-            $customer = Auth::id();
-            if (!$customer) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Người dùng chưa đăng nhập'
-                ], 401);
-            }
-
-            // Xác thực địa chỉ giao hàng
-            $shippingAddressId = $request->shipping_address_id;
-            $shippingAddress = ShippingAddress::where('customer_id', $customer)
-                ->where('id', $shippingAddressId)
-                ->first();
-
-            if (!$shippingAddress) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Địa chỉ giao hàng không hợp lệ'
-                ], 400);
-            }
-
-            // Lấy các sản phẩm trong giỏ hàng
-            $cart = Cart::where('customer_id', $customer)->first();
-            if (!$cart) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Không có sản phẩm trong giỏ hàng'
-                ], 400);
-            }
-
-            $cartItems = $cart->cartItems()->with(['product', 'colors'])->where('selected', 1)->get();
-
-            if ($cartItems->isEmpty()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Giỏ hàng trống'
-                ], 400);
-            }
-
-            // Bắt đầu giao dịch
-            DB::beginTransaction();
-
-            // Tính tổng giá trị đơn hàng
-            $totalPrice = 0;
-            foreach ($cartItems as $item) {
-                if ($item->product) { // Đảm bảo sản phẩm tồn tại
-                    $totalPrice += $item->product->price * $item->quantity;
-                }
-            }
-            if ($totalPrice <= 0) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Giá trị đơn hàng không hợp lệ'
-                ], 400);
-            }
-
-            // Tạo đơn hàng
-            $order = Order::create([
-                'customer_id' => $customer,
-                'order_number' => 'ORDER_' . uniqid(),
-                'total_price' => $totalPrice,
-                'status' => 'Waiting for confirmation',
-                'shipping_address_id' => $shippingAddress->id,
-                'payment_method' => $request->payment_method,
-                'payment_status' => $request->payment_method === 'cod' ? 'unpaid' : 'paid', 
-            ]);
-            foreach ($cartItems as $item) {
-                if ($item->product) { // Đảm bảo sản phẩm tồn tại
-                    $product = $item->product;
-            
-                    // Kiểm tra nếu sản phẩm có màu sắc (nếu có thì kiểm tra số lượng theo màu sắc)
-                    if ($item->color_id) {
-                        // Sản phẩm có màu sắc, kiểm tra số lượng trong bảng colors
-                        $color = $product->colors()->where('id', $item->color_id)->first();
-            
-                        if (!$color || $color->quantity < $item->quantity) {
-                            // Nếu số lượng màu sắc không đủ, hủy đơn hàng hoặc thông báo lỗi
-                            DB::rollBack();
-                            return response()->json([
-                                'status' => 'error',
-                                'message' => 'Số lượng màu sắc không đủ'
-                            ], 400);
-                        }
-            
-                        // Trừ số lượng trong bảng colors
-                        $color->quantity -= $item->quantity;
-                        $color->save();
-                    } else {
-                        // Sản phẩm không có màu sắc, tìm một màu mặc định hoặc trừ số lượng trong bảng colors
-                        // Nếu không có màu sắc, kiểm tra trực tiếp trên bảng colors mà không cần điều kiện màu sắc
-                        $color = $product->colors()->first(); // Lấy bất kỳ màu sắc nào (kể cả null nếu có)
-            
-                        if (!$color || $color->quantity < $item->quantity) {
-                            // Nếu không có màu sắc hoặc số lượng không đủ, hủy đơn hàng hoặc thông báo lỗi
-                            DB::rollBack();
-                            return response()->json([
-                                'status' => 'error',
-                                'message' => 'Số lượng sản phẩm không đủ'
-                            ], 400);
-                        }
-            
-                        // Trừ số lượng trong bảng colors (cho sản phẩm không có màu sắc rõ ràng)
-                        $color->quantity -= $item->quantity;
-                        $color->save();
-                    }
-            
-                    // Thêm mục đơn hàng vào bảng order_items
-                    OrderItem::create([
-                        'order_id' => $order->id,
-                        'product_id' => $item->product_id,
-                        'color_id' => $item->color_id, // Nếu không có màu sắc, sẽ là null
-                        'quantity' => $item->quantity,
-                        'price' => $item->product->price
-                    ]);
-                }
-            }
-            Log::info($cartItems);  // Để kiểm tra xem cartItems có dữ liệu đúng khôn
-            // Gửi email xác nhận đơn hàng
-            $cartItemsArray = $cartItems->toArray();
-            Mail::to($request->user()->email)
-            ->queue((new OrderConfirmation($order, $cartItemsArray, $totalPrice))->delay(now()->addSeconds(5)));
-        
-
-            // Xóa giỏ hàng sau khi đặt hàng thành công
-            $cart->cartItems()->where('selected', 1)->delete();
-
-            DB::commit();
-
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Đặt hàng thành công',
-                'data' => [
-                    'order_number' => $order->order_number,
-                    'total_price' => $order->total_price
-                ]
-            ], 200);
-        } catch (Exception $e) {
-            // Rollback nếu có lỗi xảy ra
-            DB::rollBack();
-
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Có lỗi xảy ra khi xử lý đơn hàng',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-
     public function updateQuantity(Request $request, $id)
     {
         try {
@@ -200,11 +48,15 @@ class OrderController extends Controller
                     'message' => 'Không tìm thấy sản phẩm trong giỏ hàng.',
                 ], 404);
             }
-            $color = $cartItem->product->colors()->where('id', $cartItem->color_id)->first();
-            if ($validatedData['quantity'] > $color->quantity) {
-                return response()->json([
-                    'message' => 'Số lượng sản phẩm trong màu sắc này không đủ.',
-                ], 400);
+            if ($cartItem->color_id)
+            {
+                $color = $cartItem->product->colors()->where('id', $cartItem->color_id)->first();
+                Log::debug($color);
+                if ($validatedData['quantity'] > $color->quantity) {
+                    return response()->json([
+                        'message' => 'Số lượng sản phẩm trong màu sắc này không đủ.',
+                    ], 400);
+                }
             }
             // Cập nhật số lượng
             $cartItem->quantity = $validatedData['quantity'];
@@ -372,7 +224,7 @@ class OrderController extends Controller
             ]);
         } catch (Exception $e)
         {
-
+            
         }
     }
 }

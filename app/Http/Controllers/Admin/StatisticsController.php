@@ -10,6 +10,10 @@ class StatisticsController extends Controller
 {
     public function monthlyRevenue()
     {
+        // Tạo danh sách đủ 12 tháng (1 - 12)
+        $months = range(1, 12);
+    
+        // Lấy dữ liệu doanh thu từ đơn hàng
         $data = DB::table('orders')
             ->select(
                 DB::raw('MONTH(created_at) as month'),
@@ -18,10 +22,18 @@ class StatisticsController extends Controller
             ->where('status', 'completed')
             ->groupBy('month')
             ->orderBy('month', 'asc')
-            ->get();
-
-        return response()->json($data);
+            ->pluck('revenue', 'month') // Lấy dữ liệu dưới dạng key-value
+            ->toArray();
+    
+        // Tạo mảng đầy đủ 12 tháng, nếu tháng nào không có doanh thu thì đặt là 0
+        $fullData = array_map(fn($month) => [
+            'month' => $month,
+            'revenue' => $data[$month] ?? 0  // Nếu không có dữ liệu, đặt doanh thu = 0
+        ], $months);
+    
+        return response()->json($fullData);
     }
+    
     public function weeklyRevenueStats()
     {
         $data = DB::table('orders')

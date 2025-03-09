@@ -1,69 +1,96 @@
-<nav class="sidebar vh-100" id="sidebar">
+<style>
+    .scrollbar-overlay::-webkit-scrollbar {
+        width: 1px;                /* Độ rộng thanh cuộn */
+    }
+
+    .scrollbar-overlay::-webkit-scrollbar-thumb {
+        background-color: #ccc;    /* Màu của thanh kéo */
+        border-radius: 4px;        /* Bo góc cho đẹp */
+    }
+
+    .scrollbar-overlay::-webkit-scrollbar-track {
+        background-color: transparent; /* Nền trong suốt */
+    }
+</style>
+<nav class="sidebar vh-100 overflow-y-auto scrollbar-overlay" id="sidebar">
     <div class="header">
         <span class="header-icon bi bi-person-circle"></span>
         <span class="header-text">Admin</span>
     </div>
-    <ul class="nav flex-column mt-3">
+    <div class="sidebarMenu nav flex-column mt-3" id="">
         <li class="nav-item">
             <a href="{{route('home')}}" class="nav-link">
-                <i class="bi bi-speedometer2 me-2"></i> <span>Dashboard</span>
+                <i class="bi bi-house-door me-2"></i> <span>Trang chủ</span>
             </a>
         </li>
         @role('Admin')
         <li class="nav-item">
             <a href="{{route('user.index')}}" class="nav-link">
-              <i class="bi bi-basket3 me-2"></i> <span>User</span>
+                <i class="bi bi-people me-2"></i> <span>Quản lý nhân sự</span>
             </a>
-          </li>
+        </li>
         @endrole
         <li class="nav-item">
             <a href="{{ route('category.list') }}" class="nav-link">
-                <i class="bi bi-list-ul me-2"></i></i> <span>Categories</span>
+                <i class="bi bi-tags me-2"></i> <span>Quản lý danh mục</span>
             </a>
         </li>
         <li class="nav-item">
             <a href="{{ route('brand.list') }}" class="nav-link">
-                <i class="bi bi-shop me-2"></i> <span>Brands</span>
+                <i class="bi bi-building me-2"></i> <span>Quản lý thương hiệu</span>
             </a>
         </li>  
         <li class="nav-item">
             <a href="{{route('product.list')}}" class="nav-link">
-                <i class="bi bi-box-seam me-2"></i> <span>Product Management</span>
+                <i class="bi bi-box me-2"></i> <span>Quản lý sản phẩm</span>
             </a>
         </li>
         <li class="nav-item">
             <a href="{{route('colors.index')}}" class="nav-link">
-                <i class="bi bi-palette me-2"></i> <span>Color</span>
+                <i class="bi bi-palette me-2"></i> <span>Quản lý màu sắc & số lượng</span>
             </a>
         </li>
         <li class="nav-item">
             <a href="{{route('orders.list')}}" class="nav-link">
-                <i class="bi bi-cart me-2"></i><span>Orders</span>
+                <i class="bi bi-cart-check me-2"></i><span>Quản lý đơn hàng</span>
             </a>
         </li>
         <li class="nav-item">
-            <a href="#" id="chatLink" class="nav-link">
-                <i class="bi bi-chat-dots me-2"></i><span>Chat</span>
+            <a href="{{route('coupon.index')}}" class="nav-link">
+                <i class="fas fa-tag me-2"></i><span>Quản lý mã giảm giá</span>
             </a>
         </li>
         <li class="nav-item">
             <a href="{{route('new.list')}}" class="nav-link">
-                <i class="bi bi-newspaper me-2"></i> <span>News</span>
+                <i class="bi bi-megaphone me-2"></i> <span>Quản lý tin tức</span>
             </a>
         </li>
         <li class="nav-item">
+            <a href="{{ route('admin.seen-index') }}" class="nav-link">
+                <i class="bi bi-chat-dots me-2"></i> <span>Quản lý tin nhắn</span>
+            </a>
+        </li>        
+        <li class="nav-item">
             <a href="{{route('customer.list')}}" class="nav-link">
-                <i class="bi bi-person-circle fs-5 me-2"></i> <span>Customer Management </span>
+                <i class="bi bi-person-lines-fill me-2"></i> <span>Quản lý người dùng</span>
             </a>
         </li>
-    </ul>
+        <li class="nav-item">
+            <a href="{{ route('comment.list') }}" class="nav-link">
+                <i class="bi bi-chat-left-text me-2"></i> <span>Quản lý bình luận</span>
+            </a>
+        </li>        
+        <li class="nav-item">
+            <a href="{{ route('rating.index') }}" class="nav-link ">
+                <i class="bi bi-star left-text me-2"></i>
+                <span class="text-gray-700">Quản lý đánh giá</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ route('discount.index') }}" class="nav-link ">
+                <i class="bi bi-fire me-2"></i>
+                <span class="text-gray-700">Quản lý giảm giá sản phẩm</span>
+            </a>
+        </li>
+    </div>
 </nav>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const customerId = localStorage.getItem('selectedCustomerId');
-        const chatLink = document.getElementById('chatLink');
-        if (customerId) {
-            chatLink.href = `{{ route('admin.seen-message', ['id' => ':id']) }}`.replace(':id', customerId);
-        }
-    });
-</script>

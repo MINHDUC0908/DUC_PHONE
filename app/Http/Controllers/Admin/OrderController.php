@@ -11,7 +11,7 @@ class OrderController extends Controller
     public function order(Request $request)
     {
         $status = $request->input('status', 'Waiting for confirmation');
-        $orders = Order::where('status', $status)->get();
+        $orders = Order::where('status', $status)->orderBy("created_at", "DESC")->paginate(25);
         return view('admin.order.order', compact('orders', 'status'));
     }
     public function updateStatus(Request $request, $id)
@@ -23,7 +23,8 @@ class OrderController extends Controller
     }
     public function show($id)
     {
-        $order = Order::findOrFail($id);
+        $order = Order::with('payments')->findOrFail($id);
+    
         return view('admin.order.show', compact('order'));
-    }
+    }    
 }

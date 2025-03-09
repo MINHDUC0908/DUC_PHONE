@@ -24,7 +24,7 @@ class CategoryController extends Controller
     {
         try {
             $name = Auth::user()->name;
-            $categories = Category::orderBy('id', 'DESC')->get();
+            $categories = Category::orderBy('id', 'DESC')->paginate(15);
             return view('admin.category.list', compact('categories', 'name'));
         } catch (Exception $e) {
             return redirect()->route('category.list')->with('error', 'Failed to fetch categories.');

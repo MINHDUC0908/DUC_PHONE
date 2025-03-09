@@ -29,13 +29,14 @@ class Comment extends Model
 
     public function admin()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, "admin_id");
     }
 
     public function replies()
     {
-        return $this->hasMany(Comment::class, 'parent_id');
+        return $this->hasMany(Comment::class, 'parent_id')->with('replies.customer', 'replies.admin', 'replies.replies'); 
     }
+    
 
     public function parent()
     {

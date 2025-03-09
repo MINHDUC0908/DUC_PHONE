@@ -13,14 +13,17 @@ class ProductController extends Controller
     public function index()
     {
         try {
-            $product = Product::with(['category', 'brand', 'colors'])
+            $product = Product::with(['category', 'brand', 'colors', 'discount'])
                         ->has('colors')
                         ->orderBy('id', 'DESC')
                         ->get();
-        
+            $minPriceProduct = Product::orderBy('price', 'asc')->first();
+            $maxPriceProduct = Product::orderBy('price', 'desc')->first();
             return response()->json([
                 'message' => 'Sản phẩm',
                 'data' => $product,
+                'min' => $minPriceProduct,
+                'max' => $maxPriceProduct,
             ]);
         } catch (QueryException $e) {
             return response()->json([
@@ -38,7 +41,7 @@ class ProductController extends Controller
     {
         try {
             // Lấy sản phẩm và thông tin liên quan
-            $product = Product::with('colors')->findOrFail($id);
+            $product = Product::with('colors', 'ratings')->withAvg('ratings', 'rating', "discount")->findOrFail($id);
 
             // Tăng lượt xem
             $product->increment('views');

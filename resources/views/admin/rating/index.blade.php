@@ -84,7 +84,7 @@
                                 <td class="ps-4">
                                     <div class="d-flex align-items-center">
                                         <div class="position-relative">
-                                            <img src="{{ asset('storage/imgCustomer/' . $rating->customer->image) }}" 
+                                            <img src="{{ asset('imgCustomer/' . $rating->customer->image) }}" 
                                                 alt="Avatar" 
                                                 class="rounded-circle border  border-primary shadow-sm"
                                                 style="width: 45px; height: 45px; object-fit: cover;">
@@ -122,7 +122,7 @@
                                 <td class="text-center">
                                     @if ($rating->image)
                                         <a href="#" data-bs-toggle="modal" data-bs-target="#imageModal{{ $rating->id }}">
-                                            <img src="{{ asset('storage/rating/' . $rating->image) }}" 
+                                            <img src="{{ asset('rating/' . $rating->image) }}" 
                                                 alt="Hình ảnh đánh giá" 
                                                 class="rounded shadow-sm border"
                                                 style="width: 60px; height: 60px; object-fit: cover; transition: transform 0.2s;">
@@ -196,7 +196,7 @@
                     <div class="row">
                         <div class="col-md-4">
                             <div class="text-center mb-3">
-                                <img src="{{ asset('storage/imgCustomer/' . $rating->customer->image) }}" 
+                                <img src="{{ asset('imgCustomer/' . $rating->customer->image) }}" 
                                     alt="Avatar" 
                                     class="rounded-circle border border-primary shadow-sm mb-3"
                                     style="width: 80px; height: 80px; object-fit: cover;">
@@ -241,7 +241,7 @@
                                     @if ($rating->image)
                                     <div>
                                         <h6 class="fw-bold mb-3">Hình ảnh đánh giá:</h6>
-                                        <img src="{{ asset('storage/rating/' . $rating->image) }}" 
+                                        <img src="{{ asset('rating/' . $rating->image) }}" 
                                             alt="Hình ảnh đánh giá" 
                                             class="img-fluid rounded shadow-sm border"
                                             style="max-height: 200px; object-fit: contain;">
@@ -272,7 +272,7 @@
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body text-center p-0">
-                        <img src="{{ asset('storage/rating/' . $rating->image) }}" 
+                        <img src="{{ asset('rating/' . $rating->image) }}" 
                             alt="Hình ảnh đánh giá" 
                             class="img-fluid"
                             style="max-height: 80vh; width: 100%; object-fit: contain;">

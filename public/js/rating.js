@@ -92,7 +92,7 @@ function filterRatingsAndImages() {
                         <td class="ps-4">
                             <div class="d-flex align-items-center">
                                 <div class="position-relative">
-                                    <img src="/storage/imgCustomer/${rating.customer.image || 'default-avatar.png'}" 
+                                    <img src="/imgCustomer/${rating.customer.image || 'default-avatar.png'}" 
                                         alt="Avatar" 
                                         class="rounded-circle border border-primary shadow-sm"
                                         style="width: 45px; height: 45px; object-fit: cover;">
@@ -130,7 +130,7 @@ function filterRatingsAndImages() {
                         <td class="text-center">
                             ${rating.image 
                                 ? `<a href="#" data-bs-toggle="modal" data-bs-target="#imageModal${rating.id}">
-                                        <img src="/storage/rating/${rating.image}" 
+                                        <img src="/rating/${rating.image}" 
                                             alt="Hình ảnh đánh giá" 
                                             class="rounded shadow-sm border"
                                             style="width: 60px; height: 60px; object-fit: cover; transition: transform 0.2s;">

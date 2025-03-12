@@ -196,7 +196,7 @@
                                         <div class="rounded-circle bg-light p-2 me-2">
                                             <div class="flex align-items-center justify-content-center">
                                                 @if($order->customer->image)
-                                                    <img src="{{ asset('storage/imgCustomer/' . $order->customer->image) }}" 
+                                                    <img src="{{ asset('imgCustomer/' . $order->customer->image) }}" 
                                                         alt="{{ $order->customer->name }}" 
                                                         class=" rounded-circle"
                                                         style="width: 45px; height: 45px; object-fit: cover;">

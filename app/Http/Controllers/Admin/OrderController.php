@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\OrderStatusUpdated as MailOrderStatusUpdated;
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use OrderStatusUpdated;
 
 class OrderController extends Controller
 {
@@ -18,6 +21,10 @@ class OrderController extends Controller
     {
         $order = Order::findOrFail($id);
         $order->status = $request->input('status');
+        if ($order->status == "Delivering")
+        {
+            Mail::to($order->customer->email)->send(new MailOrderStatusUpdated($order));
+        }
         $order->save();
         return redirect()->back()->with('success', 'Trạng thái đơn hàng đã được cập nhật');
     }

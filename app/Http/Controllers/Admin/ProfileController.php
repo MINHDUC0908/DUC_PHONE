@@ -42,11 +42,20 @@ class ProfileController extends Controller
                     'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120'
                 ]);
                 $file = $request->file('image');
-                if (!empty($user->image)) {
-                    Storage::delete('public/profile_images/' . $user->image);
+                // if (!empty($user->image)) {
+                //     Storage::delete('public/profile_images/' . $user->image);
+                // }
+                // $filename = time() . '.' . $file->getClientOriginalExtension();
+                // $file->storeAs('public/profile_images', $filename);
+                if ($user->image) {
+                    $imagePath = public_path('profile_image/' . $user->image);
+                    if (file_exists($imagePath)) {
+                        unlink($imagePath);
+                    }
                 }
-                $filename = time() . '.' . $file->getClientOriginalExtension();
-                $file->storeAs('public/profile_images', $filename);
+                $image = $request->file('image');
+                $filename = time() . " - " . $image->getClientOriginalName();
+                $image->move(public_path("profile_image"), $filename);
                 $user->image = $filename;
                 $user->save();
             }

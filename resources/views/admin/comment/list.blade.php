@@ -51,7 +51,7 @@
                                     <div class="d-flex align-items-center">
                                         <div class="d-flex align-items-center justify-content-center me-2">
                                             @if($comment->customer->image)
-                                                <img src="{{ asset('storage/imgCustomer/' . $comment->customer->image) }}" 
+                                                <img src="{{ asset('imgCustomer/' . $comment->customer->image) }}" 
                                                         alt="{{ $comment->customer->name }}" 
                                                         class="img-thumbnail rounded-circle"
                                                         style="width: 40px; height: 40px; object-fit: cover;">

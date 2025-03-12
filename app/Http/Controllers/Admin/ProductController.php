@@ -35,7 +35,6 @@ class ProductController extends Controller
     }
     public function store(ProductRequest $request)
     {
-        // $products = Product::where('name', 'like', '%keyword%')->get(); // Tìm sản phẩm theo tên
         try {
             $product = new Product();
             $product->product_name = $request->input('product_name');
@@ -46,14 +45,14 @@ class ProductController extends Controller
                 $image = $request->file('images');
                 $imageName = time() . '-' . $image->getClientOriginalName();
                 
-                // Tạo thumbnail trước khi di chuyển file
-                $thumbnailPath = 'products/thumbnails/' . $imageName;
-                // Đọc file ảnh trực tiếp từ temporary path
-                $thumbnail = Image::make($image->getRealPath())
-                    ->resize(300, 300)
-                    ->blur(10);
-                Storage::disk('public')->put($thumbnailPath, $thumbnail->encode());
-                $product->thumbnail = $thumbnailPath;
+                // // Tạo thumbnail trước khi di chuyển file
+                // $thumbnailPath = 'products/thumbnails/' . $imageName;
+                // // Đọc file ảnh trực tiếp từ temporary path
+                // $thumbnail = Image::make($image->getRealPath())
+                //     ->resize(300, 300)
+                //     ->blur(10);
+                // Storage::disk('public')->put($thumbnailPath, $thumbnail->encode());
+                // $product->thumbnail = $thumbnailPath;
 
 
                 // Di chuyển ảnh gốc vào thư mục imgProduct
@@ -73,7 +72,7 @@ class ProductController extends Controller
             $product->brand_id = $request->input('brand_id');
             
             $product->save(); 
-
+            dd($request->all());
             return redirect()->route('product.list')->with('status', 'Sản phẩm đã được thêm thành công.');
         } catch (Exception $e) {
             Log::error('Lỗi: ' . $e->getMessage()); 
@@ -121,16 +120,16 @@ class ProductController extends Controller
                 $image = $request->file('images');
                 $imageName = time() . ' - ' . $image->getClientOriginalName();
 
-                // Tạo thumbnail trước khi di chuyển file
-                $thumbnailPath = 'products/thumbnails/' . $imageName;
-                // Đọc file ảnh từ temporary path
-                $thumbnail = Image::make($image->getRealPath())
-                    ->resize(300, 300)
-                    ->blur(10);  // Làm mờ ảnh thumbnail
-                Storage::disk('public')->put($thumbnailPath, $thumbnail->encode());
+                // // Tạo thumbnail trước khi di chuyển file
+                // $thumbnailPath = 'products/thumbnails/' . $imageName;
+                // // Đọc file ảnh từ temporary path
+                // $thumbnail = Image::make($image->getRealPath())
+                //     ->resize(300, 300)
+                //     ->blur(10);  // Làm mờ ảnh thumbnail
+                // Storage::disk('public')->put($thumbnailPath, $thumbnail->encode());
 
-                // Lưu thumbnail vào CSDL
-                $product->thumbnail = $thumbnailPath;
+                // // Lưu thumbnail vào CSDL
+                // $product->thumbnail = $thumbnailPath;
 
                 // Di chuyển ảnh gốc vào thư mục imgProduct
                 $image->move(public_path('imgProduct'), $imageName);

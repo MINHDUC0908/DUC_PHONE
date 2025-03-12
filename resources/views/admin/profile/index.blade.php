@@ -75,7 +75,7 @@
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content bg-transparent border-0">
                             <div class="modal-body p-0">
-                                <img src="{{ asset('storage/profile_images/' . $user->image) }}"  id="modalImage" class="img-fluid rounded shadow" alt="Profile Image">
+                                <img src="{{ asset('profile_image/' . $user->image) }}"  id="modalImage" class="img-fluid rounded shadow" alt="Profile Image">
                             </div>
                         </div>
                     </div>
@@ -89,7 +89,7 @@
                             <div class="col-md-4 text-center mb-4">
                                 <div class="position-relative mx-auto mb-3" style="width: 150px; height: 150px;">
                                     @if($user->image)
-                                        <img src="{{ asset('storage/profile_images/' . $user->image) }}" 
+                                        <img src="{{ asset('profile_image/' . $user->image) }}" 
                                             alt="{{ $user->name }}" 
                                             class="img-thumbnail rounded-circle w-100 h-100 object-fit-cover border-3"
                                             data-bs-toggle="modal" 
@@ -193,7 +193,7 @@
                                     <h5 class="mb-3">Ảnh đại diện hiện tại</h5>
                                     <div class="position-relative d-inline-block mb-3">
                                         @if($user->image)
-                                            <img src="{{ asset('storage/profile_images/' . $user->image) }}" alt="{{ $user->name }}" 
+                                            <img src="{{ asset('profile_image/' . $user->image) }}" alt="{{ $user->name }}" 
                                                 class="img-thumbnail rounded-circle" style="width: 180px; height: 180px; object-fit: cover;">
                                         @else
                                             <div class="bg-light rounded-circle d-flex align-items-center justify-content-center border" style="width: 180px; height: 180px;">

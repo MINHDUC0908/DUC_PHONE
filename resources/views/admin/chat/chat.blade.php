@@ -6,7 +6,7 @@
             <div class="row">
                 <div class="col-lg-6">
                     @if($customer->image)
-                        <img src="{{ asset('storage/imgCustomer/' . $customer->image) }}" 
+                        <img src="{{ asset('imgCustomer/' . $customer->image) }}" 
                             alt="{{ $customer->name }}" 
                             class="img-thumbnail rounded-circle"
                             style="width: 45px; height: 45px; object-fit: cover;">
@@ -86,7 +86,7 @@
                             </div>
                             <div style="display: flex; align-items: center;">
                                 @if($customer->image)
-                                    <img src="{{ asset('storage/imgCustomer/' . $customer->image) }}" 
+                                    <img src="{{ asset('imgCustomer/' . $customer->image) }}" 
                                             alt="{{ $customer->name }}" 
                                             class="img-thumbnail rounded-circle"
                                             style="width: 45px; height: 45px; object-fit: cover; margin-right: 10px;">
@@ -201,7 +201,7 @@
                         <div style='display: flex; align-items: center;'> 
                             <div class="message-data" style='margin-right: 20px;'>
                                 @if($customer->image)
-                                    <img src="{{ asset('storage/imgCustomer/' . $customer->image) }}" 
+                                    <img src="{{ asset('imgCustomer/' . $customer->image) }}" 
                                         alt="{{ $customer->name }}" 
                                         class="img-thumbnail rounded-circle"
                                         style="width: 45px; height: 45px; object-fit: cover;">

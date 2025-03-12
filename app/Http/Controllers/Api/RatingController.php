@@ -42,7 +42,7 @@ class RatingController extends Controller
             if ($request->hasFile('image')) {
                 $file = $request->file('image');
                 $imageName = time() . '.' . $file->getClientOriginalExtension();
-                $file->storeAs('public/rating', $imageName);
+                $file->move(public_path("rating"), $imageName);
                 $rating->image = $imageName;
             }
             $rating->save();

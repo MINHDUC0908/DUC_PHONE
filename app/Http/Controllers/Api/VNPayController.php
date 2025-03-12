@@ -25,9 +25,16 @@ class VNPayController extends Controller
         $couponCode = $request->input("code");
         $coupon = Coupon::where('code', $couponCode)
             ->where('expires_at', '>', now()) // Kiểm tra hạn sử dụng
-            ->where('is_used', false) // Chưa sử dụng
             ->first();
-
+        $couponQuantity = Coupon::where('code', $couponCode)
+                        ->where('quantity', ">", "0")
+                        ->first();
+        if (!$couponQuantity)
+        {
+            return response()->json([
+                'message' => "Đã hết số lượng cho mã giảm giá này",
+            ]);
+        }
         if (!$coupon) {
             return response()->json([
                 'message' => 'Mã giảm giá không hợp lệ hoặc đã hết hạn!'
@@ -114,7 +121,6 @@ class VNPayController extends Controller
             {
                 $coupon = Coupon::where('code', $couponCode)
                         ->where('expires_at', '>', now())
-                        ->where('is_used', false)
                         ->first();
                 if (!$coupon) {
                     return response()->json([
@@ -190,6 +196,11 @@ class VNPayController extends Controller
                         ]);
                     }                    
                 }
+            }
+            if ($coupon && $coupon->quantity > 0)
+            {   
+                $coupon->quantity -=1;
+                $coupon->save();
             }
             $cartItemsArray = $cartItems->toArray();
             if ($paymentMethod === 'cod') {

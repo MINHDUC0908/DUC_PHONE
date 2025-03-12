@@ -479,10 +479,16 @@
                         </tbody>
                         <tfoot class="bg-light">
                             <tr>
+                                <td colspan="5" class="text-end fw-bold">Tổng giảm giá:</td>
+                                <td class="text-end text-danger">
+                                    -{{ number_format($order->orderItems->sum(fn($item) => $item->product->discount ? $item->price * ($item->product->discount->discount_value / 100) * $item->quantity : 0)) }} ₫
+                                </td>
+                            </tr>
+                            <tr>
                                 <td colspan="5" class="text-end fw-bold">Tổng cộng:</td>
                                 <td class="text-end total-price">{{ number_format($order->total_price) }} ₫</td>
                             </tr>
-                        </tfoot>
+                        </tfoot>                        
                     </table>
                 </div>
             </div>

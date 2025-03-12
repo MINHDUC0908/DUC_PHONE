@@ -137,8 +137,8 @@ class OrderController extends Controller
             $customer = Auth::id();
             $orders = Order::with('customer', 'shippingAddress')->where("customer_id", $customer)
                 ->orderBy('id', 'DESC')
-                // ->get();
-                ->paginate(15);
+                ->get();
+                // ->paginate(15);
             if ($orders->isEmpty()) {
                 return response()->json([
                     'message' => 'Không có đơn hàng chưa hoàn thành.',
@@ -170,8 +170,8 @@ class OrderController extends Controller
             $orders = Order::with('customer', 'shippingAddress')->where("customer_id", $customer)
                 ->where('status', $status)
                 ->orderBy('id', 'DESC')
-                ->paginate(5);
-
+                // ->paginate(5);
+                ->get();
             return response()->json([
                 'message' => "Lấy đơn hàng có trạng thái '$status' thành công",
                 'data' => $orders,
@@ -197,6 +197,7 @@ class OrderController extends Controller
             $order->save();
 
             return response()->json([
+                'status' => 'success',
                 'message' => 'Hủy đơn hàng thành công',
                 'data' => $order,
             ], 200);

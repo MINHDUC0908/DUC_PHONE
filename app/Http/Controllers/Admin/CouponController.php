@@ -31,7 +31,7 @@ class CouponController extends Controller
             'code' => strtoupper($request->code),
             'discount_amount' => $request->discount_amount,
             'expires_at' => Carbon::parse($request->expires_at),
-            'is_used' => false,
+            'quantity' => $request->input('quantity')
         ]);
 
         return redirect()->route('coupon.index')->with('status', 'Mã giảm giá đã được thêm thành công!');
@@ -58,6 +58,7 @@ class CouponController extends Controller
             'code' => strtoupper($request->code),
             'discount_amount' => $request->discount_amount,
             'expires_at' => Carbon::parse($request->expires_at),
+            'quantity' => $request->input('quantity')
         ]);
 
         return redirect()->route('coupon.index')->with('status', 'Mã giảm giá đã được cập nhật thành công!');

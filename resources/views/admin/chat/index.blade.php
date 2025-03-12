@@ -91,7 +91,7 @@
                                     <li class="clearfix" data-id="{{ $customer->id }}">
                                         <div class="flex align-items-center justify-content-center">
                                             @if($customer->image)
-                                                <img src="{{ asset('storage/imgCustomer/' . $customer->image) }}" 
+                                                <img src="{{ asset('imgCustomer/' . $customer->image) }}" 
                                                     alt="{{ $customer->name }}" 
                                                     class="img-thumbnail rounded-circle"
                                                     style="width: 45px; height: 45px; object-fit: cover;">

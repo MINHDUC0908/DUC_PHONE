@@ -13,7 +13,7 @@
     <div class="ms-auto dropdown">
         <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" role="button" data-bs-toggle="dropdown">
             @if(Auth::user()->image)
-                <img src="{{ asset('storage/profile_images/' . Auth::user()->image) }}" 
+                <img src="{{ asset('profile_image/' . Auth::user()->image) }}" 
                     alt="{{ Auth::user()->name }}" 
                     class="img-thumbnail rounded-circle border"
                     style="width: 40px; height: 40px; object-fit: cover;">

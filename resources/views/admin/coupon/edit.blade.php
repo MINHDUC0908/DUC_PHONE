@@ -101,6 +101,31 @@
                                     @enderror
                                 </div>
                             </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="quantity" class="form-label fw-bold text-danger mb-1 d-flex align-items-center small">
+                                        <span class="badge bg-danger text-white rounded-circle me-2">3</span>
+                                        <i class="fas fa-tags me-1"></i> Số lượng mã giảm giá
+                                    </label>
+                                    <div class="input-group shadow-sm">
+                                        <span class="input-group-text bg-white border-end-0">
+                                            <i class="fas fa-hashtag text-danger small"></i>
+                                        </span>
+                                        <input type="number"
+                                             class="form-control border-start-0 bg-white @error('quantity') is-invalid @enderror"
+                                             id="quantity"
+                                             name="quantity"
+                                             placeholder="Nhập số lượng mã giảm giá"
+                                             value="{{ old('quantity', $coupon->quantity) }}"
+                                             required>
+                                    </div>
+                                    @error('quantity')
+                                        <div class="alert alert-danger mt-1 py-1 px-2 small">
+                                            <i class="fas fa-exclamation-circle me-1"></i>{{ $message }}
+                                        </div>
+                                    @enderror
+                                </div>
+                            </div>
                         </div>
                         
                         <div class="d-flex justify-content-center mt-4">

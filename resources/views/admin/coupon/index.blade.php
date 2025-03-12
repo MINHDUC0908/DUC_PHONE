@@ -49,6 +49,7 @@
                             <th class="py-3 text-center">ID</th>
                             <th class="py-3">Mã giảm giá</th>
                             <th class="py-3">Số tiền giảm</th>
+                            <th class="py-3 text-center">Số lượng mã giảm giá</th>
                             <th class="py-3">Ngày hết hạn</th>
                             <th class="py-3 text-center">Trạng thái</th>
                             <th class="py-3">Ngày tạo</th>
@@ -66,6 +67,9 @@
                             </td>
                             <td class="align-middle fw-semibold text-primary">
                                 {{ number_format($coupon->discount_amount, 0, ',', '.') }}đ
+                            </td>
+                            <td class="align-middle fw-semibold text-primary text-center">
+                                <i class="fas fa-ticket-alt me-2 small text-danger"></i>{{ $coupon->quantity }}
                             </td>
                             <td class="align-middle">
                                 <span class="text-muted">

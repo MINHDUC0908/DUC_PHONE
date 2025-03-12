@@ -81,20 +81,29 @@ class ProfileController extends Controller
             $customer = Customer::findOrFail($id);
 
             if ($request->hasFile('image')) {
-                $file = $request->file('image');
-                // ✅ Xóa ảnh cũ nếu có
-                if (!empty($customer->image)) {
-                    Storage::delete("public/imgCustomer/{$customer->image}");
+                // $file = $request->file('image');
+                // // ✅ Xóa ảnh cũ nếu có
+                // if (!empty($customer->image)) {
+                //     Storage::delete("public/imgCustomer/{$customer->image}");
+                // }
+                // // ✅ Tạo tên file mới & lưu vào thư mục
+                // $filename = time() . '.' . $file->getClientOriginalExtension();
+                // $file->storeAs('public/imgCustomer', $filename);
+                if ($customer->image) {
+                    $imagePath = public_path('imgCustomer/' . $customer->image);
+                    if (file_exists($imagePath)) {
+                        unlink($imagePath);
+                    }
                 }
-                // ✅ Tạo tên file mới & lưu vào thư mục
-                $filename = time() . '.' . $file->getClientOriginalExtension();
-                $file->storeAs('public/imgCustomer', $filename);
+                $image = $request->file('image');
+                $filename = time() . " - " . $image->getClientOriginalName();
+                $image->move(public_path("imgCustomer"), $filename);
                 $customer->image = $filename;
                 $customer->save();
 
                 return response()->json([
                     'message' => 'Cập nhật ảnh thành công!',
-                    'image' => asset("storage/imgCustomer/{$filename}"),
+                    'image' => asset("imgCustomer/{$filename}"),
                     'status' => "success",
                 ]);
             }

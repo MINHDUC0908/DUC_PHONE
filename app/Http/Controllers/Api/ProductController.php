@@ -14,7 +14,7 @@ class ProductController extends Controller
     {
         try {
             $product = Product::with(['category', 'brand', 'colors', 'discount'])
-                        ->has('colors')
+                        ->has('colors') // có tác dụng lọc các sản phẩm chỉ lấy những sản phẩm có ít nhất một màu sắc (colors).
                         ->orderBy('id', 'DESC')
                         ->get();
             $minPriceProduct = Product::orderBy('price', 'asc')->first();

@@ -250,11 +250,14 @@
 <div class="container-fluid px-4 py-4">
     <div class="main-card p-4">
         <!-- Order Header -->
-        <h2 class="text-primary fw-bold order-title mb-4">
-            <i class="fas fa-receipt me-2"></i> Chi tiết đơn hàng #{{ $order->order_number }}
-        </h2>
-        
-        <!-- Order Info Card -->
+        <div style="display: flex; align-items: center; justify-content: space-between">
+            <h2 class="text-primary fw-bold order-title mb-4">
+                <i class="fas fa-receipt me-2"></i> Chi tiết đơn hàng #{{ $order->order_number }}
+            </h2>
+            <a href="{{ route('orders.print', $order->id) }}" class="btn btn-outline-primary btn-sm d-flex align-items-center gap-2">
+                <i class="bi bi-printer"></i> In hóa đơn
+            </a>            
+        </div>
         <div class="section-card">
             <div class="section-header bg-white text-primary">
                 <i class="fas fa-info-circle"></i> Thông tin đơn hàng

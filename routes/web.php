@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DiscountController;
 use App\Http\Controllers\Admin\NewController;
 use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\PDFController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\RatingController;
@@ -54,6 +55,7 @@ Route::group(['middleware' => ['auth', 'role:Admin']], function () {
         Route::get('list', [OrderController::class, 'order'])->name('list');
         Route::get('show/{id}', [OrderController::class, 'show'])->name('show');
         Route::put('update/{id}', [OrderController::class, 'updateStatus'])->name('updateStatus');
+        Route::get('/orders/{id}/print', [PDFController::class, 'print'])->name('print');
     });
     Route::prefix('customer')->name('customer.')->group(function(){
         Route::get('list', [CustomerController::class,'index'])->name('list');

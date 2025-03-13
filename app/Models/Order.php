@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use NumberToWords\NumberToWords;
 
 class Order extends Model
 {
@@ -46,4 +47,12 @@ class Order extends Model
     {
         return $this->total_price - $this->discount_amount;
     }
+    // composer require kwn/number-to-words
+    // public function getTotalInWordsAttribute()
+    // {
+    //     $numberToWords = new NumberToWords();
+    //     $numberTransformer = $numberToWords->getNumberTransformer('vi'); // 'vi' cho tiếng Việt
+    
+    //     return ucfirst($numberTransformer->toWords($this->total_price)) . ' đồng';
+    // }
 }

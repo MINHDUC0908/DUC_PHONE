@@ -1,0 +1,26 @@
+composer require guzzlehttp/guzzle
+=> cài đặt GuzzleHTTP giúp Laravel gọi API từ Gemini.
+
+composer require barryvdh/laravel-dompdf
+=> Tạo file PDF từ HTML trong Laravel.
+
+composer require intervention/image
+=> Xử lý hình ảnh (resize, crop, watermark,...) trong Laravel.
+
+composer require kwn/number-to-words
+=> Chuyển đổi số thành chữ (ví dụ: 123 -> "one hundred twenty-three").
+
+composer require laravel/sanctum 
+=> Xác thực API bằng token (SPA Authentication).
+
+composer require laravel/socialite
+=> Đăng nhập bằng tài khoản Google, Facebook, GitHub,...
+
+composer require laravel/tinker
+=> Công cụ dòng lệnh để chạy mã PHP trong Laravel.
+
+composer require pusher/pusher-php-server
+=> Gửi thông báo real-time bằng Pusher.
+
+composer require spatie/laravel-permission	
+=> Quản lý quyền và vai trò của user trong Laravel.

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ProductRequest;
 use App\Models\Brand;
 use App\Models\Category;
+use App\Models\Color;
 use App\Models\Product;
 use Exception;
 use Illuminate\Http\Request;
@@ -70,9 +71,23 @@ class ProductController extends Controller
             }
             $product->category_id = $request->input('category_id');
             $product->brand_id = $request->input('brand_id');
-            
             $product->save(); 
-            dd($request->all());
+            if ($product) {
+                $colors = $request->input('color');
+                $quantities = $request->input('quantity');
+    
+                if (!empty($colors) && !empty($quantities)) {
+                    foreach ($colors as $index => $color) {
+                        Color::create([
+                            'product_id' => $product->id,
+                            'color' => $color,
+                            'quantity' => $quantities[$index] ?? 0
+                        ]);
+                    }
+                }
+            }
+    
+            Log::info("Thêm sản phẩm thành công", ['product_id' => $product->id]);
             return redirect()->route('product.list')->with('status', 'Sản phẩm đã được thêm thành công.');
         } catch (Exception $e) {
             Log::error('Lỗi: ' . $e->getMessage()); 

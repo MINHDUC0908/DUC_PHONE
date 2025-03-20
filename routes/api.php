@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ChatBotController;
 use App\Http\Controllers\Api\AddressController;
 use App\Http\Controllers\Api\Auth\LoginController;
 use App\Http\Controllers\Api\Auth\LoginGoogleController;
@@ -103,3 +104,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post("storeReview", [RatingController::class, "storeReview"]);
 });
 Route::get('rating', [RatingController::class, 'index']);
+
+Route::post('/chatbot', [ChatBotController::class, 'chat']);

@@ -243,13 +243,11 @@ class VNPayController extends Controller
     public function processVNPay($order, $totalPrice)
     {
         // Thông tin cấu hình VNPay
-        $vnp_TmnCode = "79J37G5G";  // Mã website của bạn
-        $vnp_HashSecret = "G6RRX221335F3YUNDITPW1UO6BIBSRH1";  // Chuỗi bí mật
-        $vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";  // URL của VNPay
+        $vnp_TmnCode = env('VNP_TMN_CODE');
+        $vnp_HashSecret = env('VNP_HASH_SECRET');
+        $vnp_Url = env('VNP_URL');        
         $vnp_ReturnUrl = route('vnpay.return');  // URL trả về sau khi thanh toán
     
-
-
         // Lưu thời gian tạo đơn hàng
         $order->created_at = now();
         $order->save();

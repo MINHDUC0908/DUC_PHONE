@@ -1,44 +1,49 @@
-Demo kết quả đạt được 
+# Demo Kết Quả Đạt Được
 
+## 📋 Giới thiệu
+Đây là phần demo giao diện quản trị của dự án. Giao diện bao gồm các chức năng quản lý thương hiệu, nhân viên, sản phẩm, đơn hàng và nhiều tính năng khác.
 
-## 📸 Giao diện Demo
+## 📸 Các giao diện chính
 
+### 1. Giao diện trang chủ
+![Trang chủ](public/demo/home.png)
 
-Giao diện trang chủ
-![Demo](public/demo/home.png)
+### 2. Quản lý thương hiệu
+![Quản lý thương hiệu](public/demo/brand.png)
 
-Giao diện quản lí thuwogn hiệu
-![Demo](public/demo/brand.png)
+### 3. Quản lý nhân viên
+![Quản lý nhân viên](public/demo/user.png)
 
-Giao diện quản lí nhân viên
-![Demo](public/demo/user.png)
+### 4. Quản lý sản phẩm
+![Quản lý sản phẩm](public/demo/product.png)
 
+### 5. Quản lý đơn hàng
+![Quản lý đơn hàng](public/demo/order.png)
 
-Giao diện quản lí sản phẩm
-![Demo](public/demo/product.png)
+### 6. Quản lý tin tức
+![Quản lý tin tức](public/demo/new.png)
 
-Giao diện quản lí đơn hàng
-![Demo](public/demo/order.png)
+### 7. Quản lý voucher
+![Quản lý voucher](public/demo/discount.png)
 
-Giao diện quản lí tin tức
-![Demo](public/demo/new.png)
+### 8. Quản lý bình luận sản phẩm
+![Quản lý bình luận](public/demo/comment.png)
 
-Giao diện quản lí voucher
-![Demo](public/demo/discount.png)
+### 9. Quản lý đánh giá sản phẩm
+![Quản lý đánh giá](public/demo/rating.png)
 
-Giao diện quản lí bình luận sản phẩm
-![Demo](public/demo/comment.png)
+### 10. Quản lý giảm giá sản phẩm
+![Quản lý giảm giá](public/demo/voucher.png)
 
-Giao diện quản lí đánh giá sản phẩm
-![Demo](public/demo/rating.png)
+### 11. Quản lý thông tin cá nhân
+![Thông tin cá nhân](public/demo/profile.png)
 
-Giao diện quản lí giảm giá sản phẩm
-![Demo](public/demo/voucher.png)
-
-Giao diện quản lí thông tin cá nhân
-![Demo](public/demo/profile.png)
-
-
-
-
-
+## 🛠 Chức năng chính
+- Quản lý thương hiệu
+- Quản lý nhân viên
+- Quản lý sản phẩm
+- Quản lý đơn hàng
+- Quản lý tin tức
+- Quản lý voucher và giảm giá
+- Quản lý bình luận và đánh giá
+- Quản lý thông tin cá nhân

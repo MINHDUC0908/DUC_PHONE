@@ -36,7 +36,7 @@ Giao diện quản lí giảm giá sản phẩm
 ![Demo](public/demo/voucher.png)
 
 Giao diện quản lí thông tin cá nhân
-![Demo](public/demo/proifile.png)
+![Demo](public/demo/profile.png)
 
 
 

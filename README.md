@@ -1,6 +1,8 @@
 ## 📋 Giới thiệu
 Đây là phần demo giao diện quản trị của dự án. Dự án này sử dụng Laravel Sanctum để xác thực API, cung cấp các phương thức đăng ký, đăng nhập và quản lý sản phẩm, cũng như quản lý đơn hàng.
 
+## Phần Front-end: https://github.com/MINHDUC0908/FE_WEB_PHONE
+
 ## Chức Năng Chính
 
 - **Xác thực người dùng:** Đăng ký và đăng nhập người dùng sử dụng Laravel Sanctum.

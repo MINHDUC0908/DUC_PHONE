@@ -16,7 +16,9 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ProfileController;
 use App\Http\Controllers\Admin\RatingController;
 use App\Http\Controllers\Admin\StatisticsController;
+use App\Http\Controllers\Api\PayPalController;
 use App\Http\Controllers\Api\VNPayController;
+use App\Http\Controllers\Api\ZaloPayController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\UserController;
 use Illuminate\Support\Facades\Mail;
@@ -146,3 +148,8 @@ Route::get('/api/statistics/dailyRevenueStats', [StatisticsController::class, 'd
 
 
 Route::get('/vnpay-return', [VNPayController::class, 'vnpayReturn'])->name('vnpay.return');
+Route::get('/zalopay-return', [ZaloPayController::class, 'zalopayReturn'])->name('zalopay.return');
+
+Route::get('/paypal/pay', [PayPalController::class, 'createOrder'])->name('paypal.pay');
+Route::get('/paypal/success', [PayPalController::class, 'success'])->name('paypal.success');
+Route::get('/paypal/cancel', [PayPalController::class, 'cancel'])->name('paypal.cancel');

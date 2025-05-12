@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\BrandController;
 use App\Http\Controllers\Api\CartController;
 use App\Http\Controllers\Api\CategoryController;
 use App\Http\Controllers\Api\ChatController;
+use App\Http\Controllers\Api\CheckOutController;
 use App\Http\Controllers\Api\CommentController;
 use App\Http\Controllers\Api\ForgotPassword;
 use App\Http\Controllers\Api\NewController;
@@ -96,9 +97,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/send-message-fe', [ChatController::class, 'sendMessageCustomer']);
     Route::get('/message-fe', [ChatController::class, 'index']);
 
-    Route::post("applyCoupon", [VNPayController::class, "applyCoupon"]);
-    Route::post('checkout', [VNPayController::class,'CheckOut']);
-    Route::get('/vnpay-return', [VNPayController::class, 'vnpayReturn'])->name('vnpay.return');
+    Route::post("applyCoupon", [CheckOutController::class, "applyCoupon"]);
+    Route::post('checkout', [CheckOutController::class,'CheckOut']);
 
 
     Route::post("storeReview", [RatingController::class, "storeReview"]);

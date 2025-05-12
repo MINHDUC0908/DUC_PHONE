@@ -20,226 +20,6 @@ use Illuminate\Support\Facades\Mail;
 
 class VNPayController extends Controller
 {
-    public function applyCoupon(Request $request)
-    {
-        $couponCode = $request->input("code");
-        $coupon = Coupon::where('code', $couponCode)
-            ->where('expires_at', '>', now()) // Kiểm tra hạn sử dụng
-            ->first();
-        $couponQuantity = Coupon::where('code', $couponCode)
-                        ->where('quantity', ">", "0")
-                        ->first();
-        if (!$couponQuantity)
-        {
-            return response()->json([
-                'message' => "Đã hết số lượng cho mã giảm giá này",
-            ]);
-        }
-        if (!$coupon) {
-            return response()->json([
-                'message' => 'Mã giảm giá không hợp lệ hoặc đã hết hạn!'
-            ], 400);
-        }
-        $customer = Auth::id();
-        if (UsedCoupon::where("customer_id", $customer)->where("coupon_id", $coupon->id)->exists()) {
-            return response()->json([
-                'message' => 'Mã giảm giá đã được sử dụng!'
-            ], 400);
-        }
-        // Tính số tiền giảm
-        $discount = min($coupon->discount_amount, $request->cart_total);
-        return response()->json([
-            'success' => true,
-            'discount' => $discount,
-        ]);
-    }
-    public function checkout(Request $request)
-    {
-        try {
-            // Kiểm tra đăng nhập
-            $customer = Auth::id();
-            if (!$customer) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Người dùng chưa đăng nhập'
-                ], 401);
-            }
-
-            // Xác thực địa chỉ giao hàng
-            $shippingAddressId = $request->shipping_address_id;
-            $shippingAddress = ShippingAddress::where('customer_id', $customer)
-                ->where('id', $shippingAddressId)
-                ->first();
-
-            if (!$shippingAddress) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Địa chỉ giao hàng không hợp lệ'
-                ], 400);
-            }
-
-            // Lấy các sản phẩm trong giỏ hàng
-            $cart = Cart::where('customer_id', $customer)->first();
-            if (!$cart) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Không có sản phẩm trong giỏ hàng'
-                ], 400);
-            }
-
-            $cartItems = $cart->cartItems()->with(['product', 'colors'])->where('selected', 1)->get();
-
-            if ($cartItems->isEmpty()) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Giỏ hàng trống'
-                ], 400);
-            }
-            
-            // Tính tổng giá trị đơn hàng
-            $totalPrice = 0;
-            foreach ($cartItems as $item) {
-                if ($item->product) {
-                    $totalPrice += $item->product->getDiscountedPrice() * $item->quantity;
-                }
-            }
-            
-            if ($totalPrice <= 0) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Giá trị đơn hàng không hợp lệ'
-                ], 400);
-            }
-
-            $paymentMethod = $request->input('payment_method', 'Cod');
-            
-
-            $couponCode = $request->input('coupon'); // Mã giảm giá (nếu có)
-            $discount = 0;
-            $coupon = null;
-            if ($couponCode)
-            {
-                $coupon = Coupon::where('code', $couponCode)
-                        ->where('expires_at', '>', now())
-                        ->first();
-                if (!$coupon) {
-                    return response()->json([
-                        'status' => 'error',
-                        'message' => 'Mã giảm giá không hợp lệ hoặc đã hết hạn!'
-                    ], 400);
-                }
-                // Tính số tiền giảm giá, không vượt quá tổng giá trị đơn hàng
-                $discount = min($coupon->discount_amount, $totalPrice);
-
-                // Cập nhật tổng giá trị sau khi giảm giá
-                $totalPrice -= $discount;
-            }
-            // Tạo đơn hàng trong database
-            DB::beginTransaction();
-            $order = Order::create([
-                'customer_id' => $customer,
-                'order_number' => 'ORDER_' . uniqid(),
-                'coupon_id' => $coupon ? $coupon->id : null,
-                'total_price' => $totalPrice,
-                'status' => 'Waiting for confirmation',
-                'shipping_address_id' => $shippingAddress->id,
-                "discount_amount" => $discount,
-                'payment_method' => $paymentMethod,
-                'payment_status' => $paymentMethod === 'Cod' ? 'Unpaid' : 'Paid', 
-            ]);
-            foreach ($cartItems as $item) {
-                if ($item->product) { // Đảm bảo sản phẩm tồn tại
-                    $product = $item->product;
-            
-                    // Kiểm tra nếu sản phẩm có màu sắc (nếu có thì kiểm tra số lượng theo màu sắc)
-                    if ($item->color_id) {
-                        $color = $product->colors()->where('id', $item->color_id)->first();
-            
-                        if (!$color || $color->quantity < $item->quantity) {
-                            DB::rollBack();
-                            return response()->json([
-                                'status' => 'error',
-                                'message' => 'Số lượng màu sắc không đủ'
-                            ], 400);
-                        }
-            
-                        // Trừ số lượng trong bảng colors
-                        $color->quantity -= $item->quantity;
-                        $color->save();
-                    } else {
-                        // Nếu không có màu sắc
-                        $color = $product->colors()->first();
-            
-                        if (!$color || $color->quantity < $item->quantity) {
-                            DB::rollBack();
-                            return response()->json([
-                                'status' => 'error',
-                                'message' => 'Số lượng sản phẩm không đủ'
-                            ], 400);
-                        }
-                        $color->quantity -= $item->quantity;
-                        $color->save();
-                    }
-            
-                    // Thêm mục đơn hàng vào bảng order_items
-                    OrderItem::create([
-                        'order_id' => $order->id,
-                        'product_id' => $item->product_id,
-                        'color_id' => $item->color_id, 
-                        'quantity' => $item->quantity,
-                        'price' => $item->product->price
-                    ]);
-                    if ($coupon) {
-                        UsedCoupon::create([
-                            'customer_id' => $customer,
-                            'coupon_id' => $coupon->id
-                        ]);
-                    }                    
-                }
-            }
-            if ($coupon && $coupon->quantity > 0)
-            {   
-                $coupon->quantity -=1;
-                $coupon->save();
-            }
-            $cartItemsArray = $cartItems->toArray();
-            if ($paymentMethod === 'cod') {
-                Log::debug("Vào được if Cod");
-                Mail::to($request->user()->email)
-                    ->queue((new OrderConfirmation($order, $cartItemsArray, $totalPrice))->delay(now()->addSeconds(5)));
-            }
-            
-            DB::commit();
-
-            // Xử lý VNPay nếu chọn phương thức thanh toán online
-            if ($paymentMethod === 'Online') {
-                $order->payment_method = 'Online';
-                $order->save();
-                return $this->processVNPay($order, $totalPrice);
-            }
-
-            // Xóa giỏ hàng sau khi đặt hàng thành công
-            $cart->cartItems()->where('selected', 1)->delete();
-            
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Đặt hàng thành công',
-                'data' => [
-                    'order_number' => $order->order_number,
-                    'total_price' => $order->total_price
-                ]
-            ], 200);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::debug($e->getMessage());
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Có lỗi xảy ra khi xử lý đơn hàng',
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
-
     public function processVNPay($order, $totalPrice)
     {
         // Thông tin cấu hình VNPay
@@ -310,14 +90,16 @@ class VNPayController extends Controller
     {
         $vnp_SecureHash = $request->vnp_SecureHash;
         $inputData = array();
+
         foreach ($request->all() as $key => $value) {
             if (substr($key, 0, 4) == "vnp_") {
                 $inputData[$key] = $value;
             }
         }
+
         unset($inputData['vnp_SecureHash']);
         ksort($inputData);
-        
+
         $hashData = "";
         $i = 0;
         foreach ($inputData as $key => $value) {
@@ -332,72 +114,61 @@ class VNPayController extends Controller
         $vnp_HashSecret = "G6RRX221335F3YUNDITPW1UO6BIBSRH1";
         $secureHash = hash_hmac('sha512', $hashData, $vnp_HashSecret);
 
-
         if ($secureHash == $vnp_SecureHash) {
             $vnp_ResponseCode = $request->vnp_ResponseCode;
             $vnp_TxnRef = $request->vnp_TxnRef;
-
+                Log::debug($vnp_TxnRef . " vnp_TxnRef");
+                Log::debug($vnp_ResponseCode . " vnp_ResponseCode");
             if ($vnp_ResponseCode == '00') {
-                $payment = Payment::where('transaction_id', $vnp_TxnRef)->first();
-                
-                if ($payment) {
-                    DB::beginTransaction();
-                    try {
-                        // Update payment status
+                $order = Order::where('order_number', $vnp_TxnRef)->first();
+                if ($order) {
+                    $order->payment_status = 'paid';
+                    $order->status = 'Processing';
+                    $order->save();
+
+                    $payment = Payment::where('transaction_id', $vnp_TxnRef)->first();
+                    if ($payment) {
                         $payment->status = 'success';
                         $payment->save();
-
-                        // Update order status
-                        $order = Order::find($payment->order_id);
-                        if ($order) {
-                            $order->payment_status = 'paid';
-                            $order->save();
-                        } else {
-                            throw new \Exception('Order not found');
-                        }
-                        $cart = Cart::where('customer_id', $order->customer_id)->first();
-                        Log::debug('Cart: ' . $cart); 
-                        if ($cart) {
-                            $cartItemsArray = $cart->cartItems()->where('selected', 1)->get()->toArray();
-                            $cart->cartItems()->where('selected', 1)->delete();
-                        }
-                        
-                        Mail::to($order->customer->email)
-                        ->queue(new OrderConfirmation($order, $cartItemsArray, $payment->amount));
-
-
-                        DB::commit();
-                        return redirect("http://localhost:5173/profiles/Delivery-history")
-                            ->with('success', 'Payment processed successfully');
-                    } catch (\Exception $e) {
-                        DB::rollBack();
-                        Log::error('VNPay payment processing error: ' . $e->getMessage());
                     }
+                    // Xóa các cartItems đã được thanh toán
+                    $customer_id = $order->customer_id;
+                    Log::debug($customer_id);
+                    $cart = Cart::where('customer_id', $customer_id)->first();
+                    if ($cart) {
+                        $cart->cartItems()->where("selected", 1)->delete();
+                    }
+
+                    return redirect()->away("http://localhost:5173/payment/success?transaction_id=$vnp_TxnRef&total_amount={$order->total_price}");
                 } else {
-                    Log::error('Payment record not found for transaction: ' . $vnp_TxnRef);
-                    return redirect('http://localhost:5173/payment/failed')
-                        ->with('error', 'Payment record not found');
+                    return redirect()->away("http://localhost:5173/payment/failed?message=Đơn hàng không tồn tại");
                 }
             } else {
-                $payment = Payment::where('transaction_id', $vnp_TxnRef)->first();
-                Log::info('Payment:', [$payment]);
-                if ($payment) {
-                    $payment->status = 'failed';
-                    $payment->save();
+                $order = Order::where('order_number', $vnp_TxnRef)->first();
+                Log::debug($order . " order");
+                if ($order) {
+                    // Xóa đơn hàng
+                    $order->forceDelete();
 
-                    $order = Order::find($payment->order_id);
-                    Log::info($order);
-                    if ($order) {
-                        $order->forceDelete();
-                        Log::debug("Xóa thành công");
+                    // Xóa thông tin thanh toán liên quan
+                    $payment = Payment::where('transaction_id', $vnp_TxnRef)->first();
+                    if ($payment) {
+                        $payment->delete();
                     }
+
+                    return redirect()->away("http://localhost:5173/payment/failed?message=Thanh toán thất bại");
+                } else {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Đơn hàng không tồn tại'
+                    ]);
                 }
-                return redirect('http://localhost:5173/payment')
-                    ->with('error', 'Payment was not successful');
             }
         } else {
-            return redirect('http://localhost:5173/payment/failed')
-                ->with('error', 'Invalid payment response');
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Dữ liệu không hợp lệ'
+            ]);
         }
-    } 
+    }
 }

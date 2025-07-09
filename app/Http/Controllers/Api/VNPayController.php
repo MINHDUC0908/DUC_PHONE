@@ -81,10 +81,17 @@ class VNPayController extends Controller
         ]);
     
         // Trả về URL của VNPay để khách hàng thanh toán
-        return response()->json([
-            'status' => 'success',
-            'vnpay_url' => $vnp_Url
-        ]);
+        // return response()->json([
+        //     'status' => 'success',
+        //     'vnpay_url' => $vnp_Url
+        // ]);
+        return [
+            'data' => [
+                'status' => 'success',
+                'vnpay_url' => $vnp_Url
+            ],
+            'status' => 200
+        ];
     }
     public function vnpayReturn(Request $request)
     {

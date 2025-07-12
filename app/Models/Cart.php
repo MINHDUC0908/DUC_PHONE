@@ -10,7 +10,7 @@ class Cart extends Model
     use HasFactory;
 
     protected $fillable = ['customer_id', 'status'];
-
+    protected $appends = ['total_price'];
     public function customer()
     {
         return $this->belongsTo(Customer::class);
@@ -26,5 +26,12 @@ class Cart extends Model
     public function color()
     {
         return $this->belongsTo(Color::class, 'color_id');
+    }
+    // Tính tổng tiền của các cartItem có selected = 1
+    public function getTotalPriceAttribute()
+    {
+        return $this->cartItems
+            ->where('selected', 1)    // chỉ lấy những item đã chọn
+            ->sum('total_price');     // sum thông qua accessor bên CartItem
     }
 }

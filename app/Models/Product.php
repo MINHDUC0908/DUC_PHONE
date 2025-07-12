@@ -13,7 +13,7 @@ class Product extends Model
     protected $fillable = [
         'category_id', 'brand_id', 'product_name', 'description', 'price', 'outstanding', 'images', 'description_image', "thumbnail"
     ];
-    protected $appends = ['time_left'];
+    protected $appends = ['time_left', "discounted_price"];
     public function getImageUrlAttribute()
     {
         return asset($this->images);
@@ -102,4 +102,8 @@ class Product extends Model
         return $this->price;
     }
 
+    public function getDiscountedPriceAttribute()
+    {
+        return $this->getDiscountedPrice(); // gọi lại logic sẵn có
+    }
 }

@@ -11,6 +11,7 @@ class CartItem extends Model
 
     protected $fillable = ['cart_id', 'product_id', 'color_id', 'quantity', 'price', 'selected'];
 
+    protected $appends = ['total_price'];
     public function cart()
     {
         return $this->belongsTo(Cart::class);
@@ -23,4 +24,13 @@ class CartItem extends Model
     {
         return $this->belongsTo(Color::class, 'color_id');
     }    
+    
+    public function getTotalPriceAttribute()
+    {
+        if ($this->selected && $this->product) {
+            return $this->product->getDiscountedPrice() * $this->quantity;
+        }
+
+        return 0;
+    }
 }

@@ -7,6 +7,7 @@ use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Services\CartService;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
@@ -15,53 +16,15 @@ use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
 {
+    protected $cartService;
+    public function __construct(CartService $cartService)
+    {
+        $this->cartService = $cartService;
+    }
     public function updateQuantity(Request $request, $id)
     {
         try {
-            // Kiểm tra xem người dùng đã đăng nhập hay chưa
-            $customer = Auth::id();
-            if (!$customer) {
-                return response()->json([
-                    'message' => 'Vui lòng đăng nhập để tiếp tục.',
-                ], 401);
-            }
-
-            // Xác thực dữ liệu từ request
-            $validatedData = $request->validate([
-                'quantity' => 'required|integer|min:1',
-            ]);
-
-            // Tìm cart item dựa trên id và customer_id
-            $cartItem = CartItem::where('id', $id)
-                ->whereHas('cart', function ($query) use ($customer) {
-                    $query->where('customer_id', $customer);
-                })
-                ->first();
-
-            // Kiểm tra nếu không tìm thấy cart item
-            if (!$cartItem) {
-                return response()->json([
-                    'message' => 'Không tìm thấy sản phẩm trong giỏ hàng.',
-                ], 404);
-            }
-            if ($cartItem->color_id)
-            {
-                $color = $cartItem->product->colors()->where('id', $cartItem->color_id)->first();
-                Log::debug($color);
-                if ($validatedData['quantity'] > $color->quantity) {
-                    return response()->json([
-                        'message' => 'Số lượng sản phẩm trong màu sắc này không đủ.',
-                    ], 400);
-                }
-            }
-            // Cập nhật số lượng
-            $cartItem->quantity = $validatedData['quantity'];
-            $cartItem->save();
-
-            return response()->json([
-                'message' => 'Cập nhật số lượng thành công.',
-                'data' => $cartItem,
-            ]);
+            return $this->cartService->updateQuantity($request, $id);
         } catch (Exception $e) {
             return response()->json([
                 'message' => 'Đã xảy ra lỗi trong quá trình xử lý.',
@@ -73,20 +36,7 @@ class OrderController extends Controller
     public function updateOrder(Request $request, $id)
     {
         try {
-            $customer = Auth::id();
-            if (!$customer) {
-                return response()->json([
-                    'message' => 'Vui lòng đăng nhập tài khoản',
-                ], 401);
-            }
-            $cartItem = CartItem::findOrFail($id);
-            $cartItem->selected = $request->input('selected', 0);
-            $cartItem->save();
-    
-            return response()->json([
-                'message' => 'Cập nhật thành công',
-                'data' => $cartItem,
-            ]);
+            return $this->cartService->updateSelectedItems($request, $id);
         } catch (Exception $e) {
             return response()->json([
                 'message' => 'Đã xảy ra lỗi trong quá trình xử lý',
@@ -97,29 +47,7 @@ class OrderController extends Controller
     public function updateAllOrders(Request $request)
     {
         try {
-            $customer = Auth::id();
-            $cart = Cart::where('customer_id', $customer)->first();
-            
-            if (!$cart) {
-                return response()->json([
-                    'message' => 'Không tìm thấy giỏ hàng.',
-                ], 404);
-            }
-            
-            // Cập nhật các cart_items thuộc cart này
-            $selected = $request->input('selected', 0);
-            CartItem::where('cart_id', $cart->id)
-                ->update(['selected' => $selected]);
-            
-            // Lấy lại các cart items sau khi update
-            $cartItems = CartItem::where('cart_id', $cart->id)
-                ->with(['product', 'colors'])
-                ->get();
-            
-            return response()->json([
-                'message' => 'Cập nhật tất cả sản phẩm thành công.',
-                'data' => $cartItems,
-            ]);
+            return $this->cartService->updateAllSelectedItems($request);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Có lỗi xảy ra: ' . $e->getMessage(),
@@ -221,7 +149,10 @@ class OrderController extends Controller
             ]);
         } catch (Exception $e)
         {
-            
+            return response()->json([
+                'message' => 'Lỗi khi hủy đơn hàng',
+                'error' => $e->getMessage(),
+            ], 500);
         }
     }
 }

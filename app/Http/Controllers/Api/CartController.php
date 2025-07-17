@@ -96,31 +96,7 @@ class CartController extends Controller
     public function viewCart()
     {
         try {
-            $customer = Auth::id();
-            if (!$customer)
-            {
-                return response()->json([
-                    'error' => 'Người dùng chưa đăng nhập',
-                    'message' => 'Vui lòng đăng nhập để xem giỏ hàng',
-                ]);
-            } else {
-                $cart = Cart::where('customer_id', $customer)
-                            ->where('status', 'pending')
-                            ->with('cartItems', 'cartItems.product', 'cartItems.colors')
-                            ->first();
-                if (!$cart)
-                {
-                    return response()->json([
-                        'message' => 'Giỏ hàng trống',
-                        'data' => []
-                    ]);
-                } else {
-                    return response()->json([
-                        'message' => 'Giỏ hàng của bạn',
-                        'data' => $cart,
-                    ]);
-                }
-            }
+            return $this->cartService->getCart();
         } catch (Exception $e)
         {
             return response()->json([
@@ -202,30 +178,7 @@ class CartController extends Controller
     public function update($id, Request $request)
     {
         try {
-            $customer = Auth::id();
-            if ($customer)
-            {
-                $cartItem = CartItem::findOrFail($id);
-                if ($request->has('quantity') && $request->quantity > 0)
-                {
-                    $cartItem->quantity = $request->quantity;
-                }
-                if ($request->has('selected'))
-                {
-                    $cartItem->selected = $request->selected;
-                }
-                $cartItem->save();
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'Cart item updated successfully',
-                    'data' => $cartItem
-                ]);
-            } else {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'User not authenticated',
-                ], 401);
-            }
+            return $this->cartService->update($id, $request);
         } catch (Exception $e)
         {
             return response()->json([

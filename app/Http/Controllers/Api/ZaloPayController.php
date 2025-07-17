@@ -73,18 +73,39 @@ class ZaloPayController extends Controller
             $response = Http::asForm()->post($endpoint, $params);
             $result = $response->json();
 
+            // if (isset($result['return_code']) && $result['return_code'] == 1) {
+            //     return response()->json([
+            //         'status' => 'success',
+            //         'zalopay_url' => $result['order_url'] ?? null,
+            //         'app_trans_id' => $app_trans_id
+            //     ]);
+            // }
+            // return response()->json([
+            //     'status' => 'error',
+            //     'message' => $result['return_message'] ?? 'Không thể tạo thanh toán ZaloPay'
+            // ], 400);
+            
             if (isset($result['return_code']) && $result['return_code'] == 1) {
-                return response()->json([
-                    'status' => 'success',
-                    'zalopay_url' => $result['order_url'] ?? null,
-                    'app_trans_id' => $app_trans_id
-                ]);
+                // Trả về array thay vì JsonResponse
+                return [
+                    'data' => [
+                        'status' => 'success',
+                        'zalopay_url' => $result['order_url'] ?? null,
+                        'app_trans_id' => $app_trans_id
+                    ],
+                    'status' => 200
+                ];
             }
 
-            return response()->json([
-                'status' => 'error',
-                'message' => $result['return_message'] ?? 'Không thể tạo thanh toán ZaloPay'
-            ], 400);
+            // Sau (đúng):
+            return [
+                'data' => [
+                    'status' => 'error',
+                    'message' => $result['return_message'] ?? 'Không thể tạo thanh toán ZaloPay'
+                ],
+                'status' => 400
+            ];
+
         } catch (\Exception $e) {
             Log::error('ZaloPay Error: ' . $e->getMessage());
             return response()->json([

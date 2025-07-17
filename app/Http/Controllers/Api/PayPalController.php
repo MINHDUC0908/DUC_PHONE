@@ -53,12 +53,25 @@ class PayPalController extends Controller
                 'amount' => $total,
                 'status' => 'pending'  // Trạng thái chờ xử lý
             ]);
-            return response()->json([
-                'status' => 'success',
-                'paypal_url' => $approvalLink
-            ]);
+            // return response()->json([
+            //     'status' => 'success',
+            //     'paypal_url' => $approvalLink
+            // ]);
+            return [
+                'data' => [
+                    'status' => 'success',
+                    'paypal_url' => $approvalLink
+                ],
+                'status' => 200
+            ];
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            return [
+                'data' => [
+                    'status' => 'error',
+                    'message' => 'Đã xảy ra lỗi khi tạo thanh toán PayPal: ' . $e->getMessage()
+                ],
+                'status' => 500
+            ];
         }
     }
 

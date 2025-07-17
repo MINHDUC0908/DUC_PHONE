@@ -4,20 +4,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CheckoutRequest;
-use App\Mail\OrderConfirmation;
-use App\Models\Cart;
 use App\Models\Coupon;
-use App\Models\Order;
-use App\Models\OrderItem;
-use App\Models\ShippingAddress;
 use App\Models\UsedCoupon;
 use App\Services\OrderService;
-use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 
 class CheckOutController extends Controller
 {
@@ -64,16 +55,17 @@ class CheckOutController extends Controller
     {
         $result = $this->orderService->checkout($request);
 
+        // Kiểm tra nếu có URL để redirect
         if (
             isset($result['data']['vnpay_url']) ||
             isset($result['data']['paypal_url']) ||
-            isset($result['data']['redirect_url'])
+            isset($result['data']['zalopay_url'])
         ) {
             return response()->json([
                 'status' => 'success',
                 'vnpay_url' => $result['data']['vnpay_url'] ?? null,
                 'paypal_url' => $result['data']['paypal_url'] ?? null,
-                'redirect_url' => $result['data']['redirect_url'] ?? null,
+                'zalopay_url' => $result['data']['zalopay_url'] ?? null,
             ]);
         }
 

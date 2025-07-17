@@ -51,7 +51,6 @@ class ForgotPassword extends Controller
                 'message' => 'Chúng tôi đã gửi liên kết đặt lại mật khẩu đến email của bạn!',
             ], 200);
         } catch (Exception $e) {
-            Log::error('Lỗi quên mật khẩu: ' . $e->getMessage());
             return response()->json([
                 'status' => false,
                 'message' => "Lỗi khi gửi yêu cầu quên mật khẩu",
@@ -78,13 +77,10 @@ class ForgotPassword extends Controller
                 'message' => 'Email không tồn tại.'
             ], 400);
         }
-        Log::debug($customer);
-        // Cập nhật mật khẩu mới
-        Log::debug('Mật khẩu trước:', ['password' => $customer->password]);
 
         $customer->password = Hash::make($request->password);
         $customer->save();        
-        Log::debug('Mật khẩu sau:', ['password' => $customer->password]);
+
         // Xóa token sau khi sử dụng
         DB::table('password_resets')->where('email', $tokenData->email)->delete();
         return response()->json([

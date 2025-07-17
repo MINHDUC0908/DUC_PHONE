@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 use App\Models\Cart;
+use App\Models\CartItem;
 
 class CartRepository
 {
@@ -29,5 +30,39 @@ class CartRepository
     {
         Cart::where('customer_id', $customerId)->first()
             ->cartItems()->where('selected', 1)->delete();
+    }
+
+
+    public function getCart($customerId)
+    {
+        return Cart::where("customer_id", $customerId)
+                ->where("status", "pending")
+                ->with("cartItems", "cartItems.product", "cartItems.colors")
+                ->first();
+    }
+
+    public function findById($id)
+    {
+        return CartItem::findOrFail($id);
+    }
+
+    public function save($cartItem)
+    {
+        return $cartItem->save();
+    }
+
+    public function findCartItemByCustomer($cartItem, $customer)
+    {
+        return CartItem::where("id", $cartItem)
+                ->whereHas('cart', function ($query) use ($customer) {
+                    $query->where('customer_id', $customer);
+                })
+                ->first();
+    }
+
+
+    public function findCartById($customer)
+    {
+        return Cart::where('customer_id', $customer)->first();
     }
 }

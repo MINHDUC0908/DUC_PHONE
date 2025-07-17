@@ -4,15 +4,21 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
+use App\Services\ProfileService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class ProfileController extends Controller
 {
+    protected $profileService;
+
+    public function __construct(ProfileService $profileService)
+    {
+        $this->profileService = $profileService;
+    }
     public function changePassword(Request $request)
     {
         // Xác thực dữ liệu đầu vào
@@ -51,22 +57,7 @@ class ProfileController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            $customer = Customer::findOrFail($id);
-            if (!$customer)
-            {
-                return response()->json([
-                    'message' => 'Không tìm thấy người dùng',
-                ]);
-            }
-            $customer->name = $request->input('name');
-            $customer->date = $request->input('date');
-            $customer->gender = $request->gender ? 1 : 0;
-            $customer->save();
-            return response()->json([
-                'message' => 'Cập nhật thành công',
-                'data' => $customer,
-
-            ], 200);
+            return $this->profileService->updateProfile($request, $id);
         } catch (Exception $e)
         {
             return response()->json([
@@ -78,35 +69,7 @@ class ProfileController extends Controller
     public function image(Request $request, $id)
     {
         try {
-            $customer = Customer::findOrFail($id);
-
-            if ($request->hasFile('image')) {
-                // $file = $request->file('image');
-                // // ✅ Xóa ảnh cũ nếu có
-                // if (!empty($customer->image)) {
-                //     Storage::delete("public/imgCustomer/{$customer->image}");
-                // }
-                // // ✅ Tạo tên file mới & lưu vào thư mục
-                // $filename = time() . '.' . $file->getClientOriginalExtension();
-                // $file->storeAs('public/imgCustomer', $filename);
-                if ($customer->image) {
-                    $imagePath = public_path('imgCustomer/' . $customer->image);
-                    if (file_exists($imagePath)) {
-                        unlink($imagePath);
-                    }
-                }
-                $image = $request->file('image');
-                $filename = time() . " - " . $image->getClientOriginalName();
-                $image->move(public_path("imgCustomer"), $filename);
-                $customer->image = $filename;
-                $customer->save();
-
-                return response()->json([
-                    'message' => 'Cập nhật ảnh thành công!',
-                    'image' => asset("imgCustomer/{$filename}"),
-                    'status' => "success",
-                ]);
-            }
+            return $this->profileService->image($request, $id);
             return response()->json([
                 'message' => 'Không có ảnh nào được tải lên!',
             ], 400);
